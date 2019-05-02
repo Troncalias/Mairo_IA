@@ -4,8 +4,12 @@
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
             <file>file:/G:/Universidade/NetBeansProjects/Mario_Test/src/Primary/Start.java</file>
-            <file>file:/G:/Universidade/NetBeansProjects/Mario_Test/src/Primary/Comands.java</file>
+            <file>file:/G:/Universidade/NetBeansProjects/Mario_Test/src/Primary/Manager_Files.java</file>
+            <file>file:/G:/Universidade/NetBeansProjects/Mario_Test/src/Primary/Comands_Executed.java</file>
+            <file>file:/G:/Universidade/NetBeansProjects/Mario_Test/src/Primary/Game_Info.java</file>
+            <file>file:/G:/Universidade/NetBeansProjects/Mario_Test/src/Enums/Tipos.java</file>
             <file>file:/G:/Universidade/NetBeansProjects/Mario_Test/src/mario_test/Mario_Test.java</file>
+            <file>file:/G:/Universidade/NetBeansProjects/Mario_Test/src/Enums/Levels.java</file>
         </group>
     </open-files>
 </project-private>

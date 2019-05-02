@@ -5,12 +5,6 @@
  */
 package Primary;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
 import luigi.MarioUtils;
 import luigi.Request;
@@ -25,10 +19,8 @@ public class Start {
     private final String type;
     private final String level;
     private final String file_saved;
-    private Comands[] previust_comands = new Comands[10];
-    private Comands[] current_comands = new Comands[10];
-
-    private BufferedWriter out;
+    private Game_Info[] previust_comands = new Game_Info[1];
+    private Game_Info current_comands;
 
     public Start(String s) {
         if (s.equals("f")) {
@@ -40,62 +32,53 @@ public class Start {
             type = "level";
             file_saved = "commands_level.csv";
         }
-        this.access_file();
     }
 
     public void start() throws IOException {
-        this.load();
         //Integer[] solution, String level, String render, String mode
+        MarioUtils m = new MarioUtils("192.168.1.5");
 
-        for (int i = 0; i < this.previust_comands.length; i++) {
-            Request req = new Request(this.previust_comands[i].getCommands(), this.level, "false", this.type);
-            MarioUtils m = new MarioUtils("192.168.1.6");
-            RunResult r = m.goMarioGo(req);
-            System.out.println(r.getScore() + "\n" + r.getX_pos() + "\n" + r.getReason_finish());
+        Comands c = new Comands();
+        Integer[] intg = new Integer[]{1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1};
+        System.out.println(intg.length);
+        c.setValues(intg);
+        Request req = new Request(c.getValues(), this.level, "false", this.type);
+        RunResult r = m.goMarioGo(req);
+        int distance_max = r.getX_pos();
+        System.out.println(distance_max);
+        
+        Integer[] intg2 = new Integer[0];
+        c.setValues(intg2);
+        c.incressSize(200);
+        int distance = 0;
+
+        for (int i = 0; 99 >= i; i++) {
+            req = new Request(c.getValues(), this.level, "true", this.type);
+            r = m.goMarioGo(req);
             System.out.println(r.toString());
-            this.previust_comands[i].add_data(r);
-            out.write(this.previust_comands[i].valeos_saved() + "\n");
-        }
+            
+            if (distance >= r.getX_pos() && i!=0) {
+                c.cahngeMoves(c.getValues().length - 200, c.getValues().length);
+                
+            } else if(r.getX_pos() - distance < distance_max/4) {
+                c.cahngeMoves(c.getValues().length - 200, c.getValues().length);
+                
+            } else if(!r.getReason_finish().equals("no_more_commands")){
+                c.cahngeMoves(c.getValues().length - 200, c.getValues().length);
+            } else{
+                c.incressSize(200);
+                distance = r.getX_pos();
+            }
+            
+            
+            
 
-        try {
-            out.flush();
-            out.close();
-        } catch (IOException e) {
         }
+        //System.out.println(r.getScore() + "\n" + r.getX_pos() + "\n" + r.getReason_finish());
+        System.out.println(r.toString());
+        //current_comands.add_data(r);
 
         //m.submitToLeaderboard(r, "Let's a go!", "forever");
     }
 
-    public void access_file() {
-        try {
-            //se ficheiro existe, append
-            if (new File(this.file_saved).isFile()) {
-                out = new BufferedWriter(new BufferedWriter(new FileWriter(this.file_saved, true)));
-            } else {
-                //senão cria e escreve header
-                out = new BufferedWriter(new BufferedWriter(new FileWriter(this.file_saved)));
-            }
-        } catch (IOException e) {
-            System.out.println(e.toString());
-        }
-    }
-
-    public void load() throws FileNotFoundException, IOException {
-        File file = new File(this.file_saved);
-        BufferedReader br = new BufferedReader(new FileReader(file));
-        String st;
-        int i = 0;
-        while ((st = br.readLine()) != null) {
-            Integer[] sequencia = new Integer[]{1, 1, 1, 1, 1, 2, 2, 2, 1, 1, 1, 1, 1, 5, 5, 5, 5, 1, 1, 1, 1, 1, 1, 5, 5, 5, 5, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 1, 1, 1, 1, 1, 5, 5, 5, 5, 1, 1, 1, 1, 1, 1, 5, 5, 5, 5, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 1, 1, 1, 1, 1, 5, 5, 5, 5, 1, 1, 1, 1, 1, 1, 5, 5, 5, 5, 1, 1};
-            this.previust_comands[i] = new Comands(sequencia);
-            System.out.println(st);
-            i++;
-        }
-
-        while (i < 10) {
-            Integer[] sequencia = new Integer[]{1, 1, 1, 1, 1, 2, 2, 2, 1, 1, 1, 1, 1, 5, 5, 5, 5, 1, 1, 1, 1, 1, 1, 5, 5, 5, 5, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 1, 1, 1, 1, 1, 5, 5, 5, 5, 1, 1, 1, 1, 1, 1, 5, 5, 5, 5, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 1, 1, 1, 1, 1, 5, 5, 5, 5, 1, 1, 1, 1, 1, 1, 5, 5, 5, 5, 1, 1};
-            this.previust_comands[i] = new Comands(sequencia);
-            i++;
-        }
-    }
 }
