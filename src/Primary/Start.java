@@ -36,10 +36,10 @@ public class Start {
 
     public void start() throws IOException {
         //Integer[] solution, String level, String render, String mode
-        MarioUtils m = new MarioUtils("192.168.1.5");
 
         Comands c = new Comands();
         Integer[] intg = new Integer[]{1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1};
+        MarioUtils m = new MarioUtils("192.168.1.5");
         System.out.println(intg.length);
         c.setValues(intg);
         Request req = new Request(c.getValues(), this.level, "false", this.type);
