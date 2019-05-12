@@ -31,7 +31,7 @@ public class Chromosome {
 
     public Chromosome(int size) {
         this.genes = new ArrayList();
-        this.addGene(size);
+        this.startGenes(size);
     }
 
     public Chromosome(int reward, int score, int time, int distance, int coins, int world, int stage, String reason, Integer[] g) {
@@ -76,34 +76,114 @@ public class Chromosome {
 
         this.genes = new ArrayList();
         this.genes.addAll(c.getGenes());
-        this.addGene(to_add);
+        this.startGenes(to_add);
     }
 
-    private void addGene(int add) {
+    /**
+     * Serve para introduzir os primeiros Genes random quando a class é iniciada
+     * @param add 
+     */
+    private void startGenes(int add) {
+        Gene g;
         for (int i = 0; i < add; i++) {
-            genes.add(new Gene());
+            g = new Gene();
+            genes.add(g);
+            
+            if(g.getX() == 2 || g.getX() == 4 || g.getX() == 5 || g.getX() == 7 || g.getX() == 9){
+                int y = ThreadLocalRandom.current().nextInt(1, 100);
+                i++;
+                if(y <= 40 && i<add){
+                    genes.add(g);
+                }
+            }
         }
     }
     
+    /**
+     * Função repetida anterior mas para quando a classe ja foi iniciada
+     * @param add 
+     */
+    public void incresseSizeGenes(int add) {
+        Gene g;
+        for (int i = 0; i < add; i++) {
+            g = new Gene();
+            genes.add(g);
+            
+            if(g.getX() == 2 || g.getX() == 4 || g.getX() == 5 || g.getX() == 7 || g.getX() == 9){
+                int y = ThreadLocalRandom.current().nextInt(1, 100);
+                i++;
+                if(y <= 40 && i<add){
+                    genes.add(g);
+                }
+            }
+        }
+    }
+    
+    /**
+     * Adicionar a lista os Genes de outra tentativa (Para o tipo de jogo FOREVER)
+     * @param c 
+     */
     public void addOtherGenes(Chromosome c){
         this.genes.addAll(c.getGenes());
     }
 
-    public void incresseGenes(int add) {
-        for (int i = 0; i < add; i++) {
-            genes.add(new Gene());
-        }
-    }
-
-    public void removeGenes(int removed) {
+    /**
+     * Serve para remover 
+     * @param removed 
+     * @return Lista de Genes removidos noum novo Chromosome
+     */
+    public List<Gene> removeGenes(int removed) {
         if (this.genes.size() < removed) {
             removed = this.genes.size();
         }
+        
+        Integer [] l = new Integer[removed];
+        
         for (int i = 0; i < removed; i++) {
-            this.genes.remove(i);
+            l[removed - i] = this.genes.remove(i).getX();
         }
+        
+        List<Gene> c = new ArrayList();
+        
+        for (Integer l1 : l) {
+            c.add(new Gene(l1));
+        }
+        
+        return c;
+    }
+    
+    /**
+     * Serve para remover o ultimo Gene da tentativa
+     * @return 
+     */
+    public Gene removeLastGene(){
+        return this.genes.remove(this.genes.size());
+    }
+    
+    /**
+     * Adiciona um lista de Genes
+     * @param g 
+     */
+    public void addGenes(List<Gene> g){
+        this.genes.addAll(g);
+    }
+    
+    /**
+     * Adiciona um Gene especifico
+     * @param g 
+     */
+    public void addGene(Gene g){
+        this.genes.add(g);
     }
 
+    public void setValues(Integer[] values){
+        this.genes = new ArrayList();
+        
+        for (Integer value : values) {
+            this.genes.add(new Gene(value));
+        }
+    }
+    
     /**
      * Possibilidade de mudar os comandos que são executados
      *
@@ -174,12 +254,11 @@ public class Chromosome {
         return ret;
     }
 
-    public Integer[] comandsRightSize(int repeat) {
+    public Integer[] comandsGameSize(int repeat) {
         Integer[] list = new Integer[this.genes.size() * repeat];
         for (int i = 0, l = 0; i < this.genes.size(); i++) {
-            for (int y = 0; y < repeat; y++) {
+            for (int y = 0; y < repeat; y++, l++) {
                 list[l] = this.getGene(i).getX();
-                l++;
             }
         }
 
@@ -242,10 +321,24 @@ public class Chromosome {
         this.reason = r.getReason_finish();
     }
     
-    public Boolean pass(int world, int stage){
-        return (this.world == world && this.stage == stage);
+    /**
+     * Verefica se passou o nivel no modo LEVEL
+     * @return 
+     */
+    public Boolean passL(){
+        return this.reason.equals("win");
     }
-
+    
+    /**
+     * Verefica se passou o nivel no modo CONTINUO
+     * @param world
+     * @param stage
+     * @return 
+     */
+    public Boolean passC(int world, int stage){
+        return this.world == world && this.stage == stage;
+    }
+    
     @Override
     public Object clone() throws CloneNotSupportedException {
         return new Chromosome(this);

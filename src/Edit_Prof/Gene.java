@@ -27,7 +27,7 @@ public class Gene {
             x = 2;
         } else if (y <= 45) {
             x = 3;
-        } else if (y <= 55) {
+        } else if (y <= 60) {
             x = 4;
         } else if (y <= 70) {
             x = 5;

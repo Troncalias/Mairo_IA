@@ -5,6 +5,7 @@
  */
 package Primary;
 
+import Edit_Prof.Chromosome;
 import java.io.IOException;
 import luigi.MarioUtils;
 import luigi.Request;
@@ -37,16 +38,51 @@ public class Start {
     public void start() throws IOException {
         //Integer[] solution, String level, String render, String mode
 
-        Comands c = new Comands();
-        Integer[] intg = new Integer[]{1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1};
-        MarioUtils m = new MarioUtils("192.168.1.5");
-        System.out.println(intg.length);
-        c.setValues(intg);
-        Request req = new Request(c.getValues(), this.level, "false", this.type);
+        Chromosome c = new Chromosome(19);
+        MarioUtils m = new MarioUtils("192.168.1.2");
+        Request req = new Request(c.comandsGameSize(1), this.level, "true", this.type);
         RunResult r = m.goMarioGo(req);
-        int distance_max = r.getX_pos();
-        System.out.println(distance_max);
+        int comand_per_secon = 20;
         
+        System.out.println("Comands used" + r.getCommands_used() + "\nDistance: " + r.getX_pos() + "\nScore: " + r.getScore() + "\nReward: " + r.getReward() + "\nComands per secon: " + comand_per_secon + "\nTime: " + r.getTime_left() + "\nStop why?: " + r.getReason_finish() +"\n\n");
+        Integer[] intg = new Integer[]{0};
+        c.setValues(intg);
+        //req = new Request(c.getValues(), this.level, "false", this.type);
+        //r = m.goMarioGo(req);
+        //System.out.println("Distance: " + r.getX_pos() + "\nScore: " + r.getScore() + "\nReward: " + r.getReward() + "\nComands per secon: " + comand_per_secon + "\nTime: " + r.getTime_left() + "\n\n");
+        /**
+        Comands cs = new Comands();
+        Integer[] intgs = new Integer[]{0};
+        cs.setValues(intgs);
+        req = new Request(cs.getValues(), this.level, "false", this.type);
+        r = m.goMarioGo(req);
+        
+        for(; r.getTime_left() > 399 ; ){
+            cs.incressSize(1);
+            req = new Request(cs.getValues(), this.level, "false", this.type);
+            r = m.goMarioGo(req);
+        }
+        comand_per_secon = cs.getValues().length;
+        System.out.println("Distance: " + r.getX_pos() + "\nScore: " + r.getScore() + "\nReward: " + r.getReward() + "\nComands per secon: " + comand_per_secon + "\nTime: " + r.getTime_left() + "\n\n");
+        
+        for(; r.getTime_left() > 398 ; ){
+            cs.incressSize(1);
+            req = new Request(cs.getValues(), this.level, "false", this.type);
+            r = m.goMarioGo(req);
+        }
+        comand_per_secon = cs.getValues().length/2;
+        System.out.println("Distance: " + r.getX_pos() + "\nScore: " + r.getScore() + "\nReward: " + r.getReward() + "\nComands per secon: " + comand_per_secon + "\nTime: " + r.getTime_left() + "\n\n");
+        
+        for(; r.getTime_left() > 397 ; ){
+            cs.incressSize(1);
+            req = new Request(cs.getValues(), this.level, "false", this.type);
+            r = m.goMarioGo(req);
+        }
+        comand_per_secon = cs.getValues().length / 3;
+        System.out.println("Distance: " + r.getX_pos() + "\nScore: " + r.getScore() + "\nReward: " + r.getReward() + "\nComands per secon: " + comand_per_secon + "\nTime: " + r.getTime_left() + "\n\n");
+        
+        /**
+        int distance_max = r.getX_pos();
         Integer[] intg2 = new Integer[0];
         c.setValues(intg2);
         c.incressSize(200);
@@ -78,7 +114,7 @@ public class Start {
         System.out.println(r.toString());
         //current_comands.add_data(r);
 
-        //m.submitToLeaderboard(r, "Let's a go!", "forever");
+        //m.submitToLeaderboard(r, "Let's a go!", "forever");**/
     }
 
 }

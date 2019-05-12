@@ -41,7 +41,7 @@ public class Comands {
         for (int i = this.values.length; i < val.length; i++) {
             if (t == 0) {
                 int y = ThreadLocalRandom.current().nextInt(1, 120);
-                if (y <= 20) {
+                if (y <= 10) {
                     val[i] = 1;
                 } else if (y <= 35) {
                     val[i] = 2;

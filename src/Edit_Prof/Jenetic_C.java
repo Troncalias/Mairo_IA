@@ -9,5 +9,6 @@ package Edit_Prof;
  *
  * @author tronc
  */
-public class Jenetic {
+public class Jenetic_C {
+    
 }
