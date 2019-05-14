@@ -13,7 +13,7 @@ public class Butao_finalizar extends javax.swing.JFrame {
     
     private int world;
     private int stage;
-    private int tries;
+    private int tries = 0;
     private boolean finalizar = false;
 
     /**
@@ -127,7 +127,7 @@ public class Butao_finalizar extends javax.swing.JFrame {
 
         jLabel3.setText("Tentativas:");
 
-        Tryes.setText("1");
+        Tryes.setText("0");
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);

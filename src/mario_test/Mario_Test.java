@@ -14,8 +14,10 @@ public class Mario_Test {
 
     /**
      * @param args the command line arguments
+     * @throws java.io.IOException
+     * @throws java.lang.CloneNotSupportedException
      */
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws IOException, CloneNotSupportedException {
         // TODO code application logic here
         Start s = new Start("f");
         s.start();

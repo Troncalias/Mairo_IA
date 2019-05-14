@@ -336,11 +336,11 @@ public class Chromosome {
      * @return 
      */
     public Boolean passC(int world, int stage){
-        return this.world == world && this.stage == stage;
+        return !(this.world == world && this.stage == stage);
     }
     
-    @Override
-    public Object clone() throws CloneNotSupportedException {
+    
+    public Chromosome replicar() throws CloneNotSupportedException  {
         return new Chromosome(this);
     }
 
