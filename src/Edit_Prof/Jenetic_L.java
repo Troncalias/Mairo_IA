@@ -34,11 +34,11 @@ public class Jenetic_L {
     private final int world;
     private final int stage;
 
-    private BufferedWriter out_f;
     private final String fileF;
+    private FileWriter Fstream;
 
-    private BufferedWriter out_s;
     private final String fileS;
+    private FileWriter Sstream;
 
     private int currentBestReward = 0;
     private MarioUtils mario;
@@ -52,35 +52,29 @@ public class Jenetic_L {
 
         //Acceder ao ficheiro que guarda os dados FALHADOS deste World/Stage
         if (new File(fileF).isFile()) {
-            this.lista_f = this.loadList(new BufferedReader(new FileReader(fileS)));
+            this.lista_f = this.loadList(new BufferedReader(new FileReader(fileF)));
             this.bestPassRecord();
             File file = new File(this.fileF);
-            FileWriter fstream = new FileWriter(file, true);
-            this.out_f = new BufferedWriter(fstream);
+            this.Fstream = new FileWriter(file, false);
         } else {
-            out_f = new BufferedWriter(new BufferedWriter(new FileWriter(fileF)));
-            out_f.write("");
-            out_f.flush();
-            out_f.close();
             File file = new File(this.fileF);
-            FileWriter fstream = new FileWriter(file, true);
-            this.out_f = new BufferedWriter(fstream);
+            this.Fstream = new FileWriter(file, false);
+            this.Fstream.write("");
+            this.Fstream.flush();
+            this.lista_f = new ArrayList();
         }
 
         //Acceder ao ficheiro que guarda os dados SUSSEDIDOS deste World/Stage
         if (new File(fileS).isFile()) {
             this.lista_s = this.loadList(new BufferedReader(new FileReader(fileS)));
             File file = new File(this.fileS);
-            FileWriter fstream = new FileWriter(file, true);
-            this.out_s = new BufferedWriter(fstream);
+            this.Sstream = new FileWriter(file, true);
         } else {
-            out_s = new BufferedWriter(new BufferedWriter(new FileWriter(fileS)));
-            out_s.write("");
-            out_s.flush();
-            out_s.close();
             File file = new File(this.fileF);
-            FileWriter fstream = new FileWriter(file, true);
-            this.out_f = new BufferedWriter(fstream);
+            this.Sstream = new FileWriter(file, true);
+            this.Sstream.write("");
+            this.Sstream.flush();
+            this.lista_s = new ArrayList();
         }
 
     }
@@ -92,8 +86,13 @@ public class Jenetic_L {
         while (line != null) {
             g = this.getChromosome(line);
             c.add(g);
+            line = b.readLine();
         }
-        return c;
+        if (c.isEmpty()) {
+            return new ArrayList();
+        } else {
+            return c;
+        }
     }
 
     private Chromosome getChromosome(String s) {
@@ -101,19 +100,19 @@ public class Jenetic_L {
         //int reward, int score, int time, int distance, int coins, int world, 
         //int stage, String reason, Integer[] g
 
-        int reward = Integer.getInteger(list[0]);
-        int score = Integer.getInteger(list[1]);
-        int time = Integer.getInteger(list[2]);
-        int distance = Integer.getInteger(list[3]);
-        int coins = Integer.getInteger(list[4]);
-        int worlds = Integer.getInteger(list[5]);
-        int stages = Integer.getInteger(list[6]);
+        int reward = Integer.parseInt(list[0]);
+        int score = Integer.parseInt(list[1]);
+        int time = Integer.parseInt(list[2]);
+        int distance = Integer.parseInt(list[3]);
+        int coins = Integer.parseInt(list[4]);
+        int worlds = Integer.parseInt(list[5]);
+        int stages = Integer.parseInt(list[6]);
         String reason = list[7];
 
         String[] values = list[8].split(",");
         Integer[] val = new Integer[values.length];
         for (int i = 0; i < values.length; i++) {
-            val[i] = Integer.getInteger(values[i]);
+            val[i] = Integer.parseInt(values[i]);
         }
 
         Chromosome c = new Chromosome(reward, score, time, distance, coins, worlds, stages, reason, val);
@@ -121,6 +120,7 @@ public class Jenetic_L {
     }
 
     public final void bestPassRecord() {
+        this.order(lista_f);
         int time = 0;
 
         //O tempo actual maior possivel
@@ -160,31 +160,26 @@ public class Jenetic_L {
             Chromosome c;
             Chromosome d;
             boolean pass = true;
-            boolean first;
             int i = 0, l = 0;
 
-            if (this.lista_s.isEmpty()) {
+            if (this.lista_f.isEmpty()) {
                 c = new Chromosome(40);
-                first = true;
+                this.currentBestReward = 0;
             } else {
                 c = this.lista_f.get(0).replicar();
-                first = false;
             }
             b.setVisible(true);
 
             while (pass) {
+                Integer[] a = c.comandsGameSize(5);
 
-                Request req = new Request(c.comandsGameSize(5), "SuperMarioBros-" + this.world + "-" + this.stage + "-v0", "false", "level");
+                Request req = new Request(a, "SuperMarioBros-" + this.world + "-" + this.stage + "-v0", "false", "level");
                 RunResult r = this.mario.goMarioGo(req);
                 c.setResults(r);
+                System.out.println(r.toString());
 
                 //Aumentar a quantidade de tentativas no final
                 b.setTries(b.getTries() + 1);
-
-                if (first) {
-                    first = false;
-                    this.currentBestReward = c.getReward();
-                }
 
                 if (c.passC(world, stage)) {
                     d = c.replicar();
@@ -192,7 +187,7 @@ public class Jenetic_L {
                     pass = false;
                     status = false;
                 } else {
-                    if (i == 25) {
+                    if (i == 50) {
                         l++;
                     }
 
@@ -200,22 +195,18 @@ public class Jenetic_L {
                     d = c.replicar();
                     this.lista_f.add(d);
                     this.order(lista_f);
+                    this.save();
                     //Mudificar este dependendo da situação atual
 
-                    if (this.currentBestReward + 200 >= c.getReward()) {
-                        c.mutate(50, c.getGenes().size() - 40 - 5 * l, c.getGenes().size());
+                    if (this.currentBestReward + 150 > c.getReward()) {
+                        c = c.mutate(c.getGenes().size() - 40 - 4 * l, c.getGenes().size());
                         i++;
-                    } else if (c.getReward() - this.currentBestReward < 200) {
-                        c.mutate(50, c.getGenes().size() - 40 - 5 * l, c.getGenes().size());
-                        i++;
-                    } else if (!r.getReason_finish().equals("no_more_commands")) {
-                        c.mutate(50, c.getGenes().size() - 40 - 5 * l, c.getGenes().size());
+                    } else if (c.getReason().equals("death")) {
+                        c = c.mutate(c.getGenes().size() - 40 - 4 * l, c.getGenes().size());
                         i++;
                     } else {
-                        this.order(lista_f);
-                        this.save();
-                        c.incresseSizeGenes(40);
                         this.currentBestReward = c.getReward();
+                        c.incresseSizeGenes(40);
                         i = 0;
                         l = 0;
                     }
@@ -226,7 +217,7 @@ public class Jenetic_L {
                 }
 
             }
-            
+
         }
     }
 
@@ -307,7 +298,7 @@ public class Jenetic_L {
             for (int y = 0; y < lista.size(); y++) {
                 if (added[y] == false) {
                     if (lista.get(l).getReward() < lista.get(y).getReward()) {
-                        l = i;
+                        l = y;
                     }
                 }
             }
@@ -321,22 +312,49 @@ public class Jenetic_L {
         return order;
     }
 
-    public void save() throws FileNotFoundException, IOException {
+    public void save() throws IOException {
         this.orderScoreLists();
 
+        this.Fstream = new FileWriter(this.fileF, false);
         for (int i = 0; i < this.lista_f.size(); i++) {
-            this.out_f.write(this.lista_f.get(i).toSaveF()+"\n");
+            String s = this.lista_f.get(i).toSaveF() + "\n";
+            this.Fstream.write(s);
         }
-        out_f.flush();
-        out_f.close();
+        this.Fstream.flush();
+        this.Fstream.close();
+        File file = new File(this.fileF);
+        this.Fstream = new FileWriter(file, false);
 
+        this.Sstream = new FileWriter(this.fileS, false);
         for (int i = 0; i < this.lista_s.size(); i++) {
-            this.out_s.write(this.lista_s.get(i).toSaveF()+"\n");
+            this.Sstream.write(this.lista_s.get(i).toSaveF() + "\n");
         }
+        this.Sstream.flush();
+        this.Sstream.close();
+        File files = new File(this.fileS);
+        this.Sstream = new FileWriter(files, false);
 
-        out_s.flush();
-        out_s.close();
+    }
 
+    public void lastSave() throws IOException {
+        this.orderScoreLists();
+
+        File file = new File(this.fileF);
+        this.Fstream = new FileWriter(file, false);
+        for (int i = 0; i < this.lista_f.size(); i++) {
+            String s = this.lista_f.get(i).toSaveF() + "\n";
+            this.Fstream.write(s);
+        }
+        this.Fstream.flush();
+        this.Fstream.close();
+
+        File files = new File(this.fileS);
+        this.Sstream = new FileWriter(files, false);
+        for (int i = 0; i < this.lista_s.size(); i++) {
+            this.Sstream.write(this.lista_s.get(i).toSaveF() + "\n");
+        }
+        this.Sstream.flush();
+        this.Sstream.close();
     }
 
     public void addChromoF(Chromosome c) {
@@ -370,7 +388,5 @@ public class Jenetic_L {
     public int getStage() {
         return stage;
     }
-    
-    
 
 }

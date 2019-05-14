@@ -53,7 +53,7 @@ public class Chromosome {
     public Chromosome(Chromosome c) {
         this.coins = c.getCoins();
         this.score = c.getScore();
-        this.reward = c.getScore();
+        this.reward = c.getReward();
         this.time = c.getTime();
         this.world = c.getWorld();
         this.stage = c.getStage();
@@ -67,7 +67,7 @@ public class Chromosome {
     public Chromosome(Chromosome c, int to_add) {
         this.coins = c.getCoins();
         this.score = c.getScore();
-        this.reward = c.getScore();
+        this.reward = c.getReward();
         this.time = c.getTime();
         this.world = c.getWorld();
         this.stage = c.getStage();
@@ -87,13 +87,13 @@ public class Chromosome {
         Gene g;
         for (int i = 0; i < add; i++) {
             g = new Gene();
-            genes.add(g);
+            genes.add(new Gene());
             
             if(g.getX() == 2 || g.getX() == 4 || g.getX() == 5 || g.getX() == 7 || g.getX() == 9){
                 int y = ThreadLocalRandom.current().nextInt(1, 100);
-                i++;
                 if(y <= 40 && i<add){
                     genes.add(g);
+                    i++;
                 }
             }
         }
@@ -111,9 +111,9 @@ public class Chromosome {
             
             if(g.getX() == 2 || g.getX() == 4 || g.getX() == 5 || g.getX() == 7 || g.getX() == 9){
                 int y = ThreadLocalRandom.current().nextInt(1, 100);
-                i++;
                 if(y <= 40 && i<add){
                     genes.add(g);
+                    i++;
                 }
             }
         }
@@ -191,15 +191,16 @@ public class Chromosome {
      * @param start
      * @param finish
      * @return
+     * @throws java.lang.CloneNotSupportedException
      */
-    public Chromosome mutate(int chance, int start, int finish) {
-        Chromosome ret = new Chromosome(0);
+    public Chromosome mutate(int start, int finish) throws CloneNotSupportedException {
+        Chromosome ret = this.replicar();
 
         if (start < finish) {
-            if (start < 0) {
+            if (start <= 0) {
                 start = 0;
             }
-            if (finish > this.getGenes().size()) {
+            if (finish >= this.getGenes().size()) {
                 finish = this.getGenes().size();
             }
         } else {
@@ -208,10 +209,8 @@ public class Chromosome {
         }
 
         for (int i = start; i < finish; i++) {
-            ret.getGenes().add(this.getGene(i));
-            
-            int y = ThreadLocalRandom.current().nextInt(1, 100);
-            if (y <= chance) {
+            int y = ThreadLocalRandom.current().nextInt(1, 10);
+            if (y <= 10) {
                 ret.getGene(i).newRandom();
             } 
         }
@@ -255,10 +254,12 @@ public class Chromosome {
     }
 
     public Integer[] comandsGameSize(int repeat) {
-        Integer[] list = new Integer[this.genes.size() * repeat];
+        int j = this.genes.size() * repeat;
+        Integer[] list = new Integer[j];
         for (int i = 0, l = 0; i < this.genes.size(); i++) {
-            for (int y = 0; y < repeat; y++, l++) {
+            for (int y = 0; y < repeat; y++) {
                 list[l] = this.getGene(i).getX();
+                l++;
             }
         }
 
@@ -277,7 +278,7 @@ public class Chromosome {
     public String toSaveF() {
         StringBuilder s = new StringBuilder();
         //int reward, int score, int time, int distance, int coins, int world, int stage, String reason, Integer[] g
-        s.append(reward).append(";").append(score).append(";").append(time).append(";").append(distance).append(";").append(coins).append(";").
+        s.append(Integer.toString(reward)).append(";").append(score).append(";").append(time).append(";").append(distance).append(";").append(coins).append(";").
                 append(world).append(";").append(stage).append(";").append(reason).append(";");
 
         for (int i = 0; i < genes.size(); i++) {
@@ -291,24 +292,6 @@ public class Chromosome {
         return v;
     }
 
-    public String toSaveS(int repeat) {
-        StringBuilder s = new StringBuilder();
-        //int reward, int score, int time, int distance, int coins, int world, int stage, String reason, Integer[] g
-        s.append(reward).append(";").append(score).append(";").append(time).append(";").append(distance).append(";").append(coins).append(";").
-                append(world).append(";").append(stage).append(";").append(reason).append(";");
-
-        for (int i = 0; i < genes.size(); i++) {
-            for (int y = 0; y < repeat; y++) {
-                s.append(genes.get(i).getX());
-                if (i < genes.size() - 1 && y < repeat - 1) {
-                    s.append(",");
-                }
-            }
-        }
-
-        String v = s.toString();
-        return v;
-    }
     
     public void setResults(RunResult r){
         this.distance = r.getX_pos();

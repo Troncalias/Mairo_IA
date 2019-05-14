@@ -9,6 +9,8 @@ import Controlo.Butao_finalizar;
 import Edit_Prof.Chromosome;
 import Edit_Prof.Jenetic_L;
 import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import luigi.MarioUtils;
 import luigi.Request;
 import luigi.RunResult;
@@ -19,29 +21,12 @@ import luigi.RunResult;
  */
 public class Start {
 
-    private final String type;
-    private final String level;
-    private final String file_saved;
-    private Game_Info[] previust_comands = new Game_Info[1];
-    private Game_Info current_comands;
 
-    public Start(String s) {
-        if (s.equals("f")) {
-            level = "SuperMarioBros-v0";
-            type = "forever";
-            file_saved = "commands_forever.csv";
-        } else {
-            level = "SuperMarioBros-1-1-v0";
-            type = "level";
-            file_saved = "commands_level.csv";
-        }
-    }
-
-    public void start() throws IOException, CloneNotSupportedException {
+    public Start() throws CloneNotSupportedException, CloneNotSupportedException, IOException {
         //Integer[] solution, String level, String render, String mode
 
         Butao_finalizar b = new Butao_finalizar();
-        MarioUtils m = new MarioUtils("192.168.1.6");
+        MarioUtils m = new MarioUtils("192.168.1.7");
 
         Jenetic_L[] lista = new Jenetic_L[32];
         int l = 0;
@@ -54,26 +39,36 @@ public class Start {
         }
 
         for (int i = 0; i < 32; i++) {
-            lista[i].run(b);
-            lista[i].save();
+            b.setWorld(lista[i].getWorld());
+            b.setStage(lista[i].getStage());
+            try {
+                lista[i].run(b);
+            } catch (IOException ex) {
+                Logger.getLogger(Start.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            lista[i].lastSave();
             if (!lista[i].getLista_s().isEmpty()) {
                 Chromosome c = lista[i].getLista_s().get(0);
-                Request req = new Request(c.comandsGameSize(1), "SuperMarioBros-" + lista[i].getWorld() +"-" + lista[i].getStage() +"-v0", "false", "level");
+                Request req = new Request(c.comandsGameSize(1), "SuperMarioBros-" + lista[i].getWorld() + "-" + lista[i].getStage() + "-v0", "false", "level");
                 RunResult r = m.goMarioGo(req);
 
-                m.submitToLeaderboard(r, "Let's a go!", "forever");
-            }else{
-                Chromosome c = lista[i].getLista_f().get(0);
-                Request req = new Request(c.comandsGameSize(5), "SuperMarioBros-" + lista[i].getWorld() +"-" + lista[i].getStage() +"-v0", "false", "level");
-                RunResult r = m.goMarioGo(req);
+                //m.submitToLeaderboard(r, "Let's a go!", "forever");
+            } else {
+                if (!lista[i].getLista_f().isEmpty()) {
+                    Chromosome c = lista[i].getLista_f().get(0);
+                    Request req = new Request(c.comandsGameSize(5), "SuperMarioBros-" + lista[i].getWorld() + "-" + lista[i].getStage() + "-v0", "false", "level");
+                    RunResult r = m.goMarioGo(req);
 
-                m.submitToLeaderboard(r, "Let's a go!", "level");
+                    //m.submitToLeaderboard(r, "Let's a go!", "level");
+                }
             }
         }
 
         b.setVisible(false);
         b.setDefaultCloseOperation(0);
     }
+
+    
 
     public void exece() {
 

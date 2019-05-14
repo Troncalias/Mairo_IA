@@ -29,13 +29,13 @@ public class Gene {
             x = 3;
         } else if (y <= 60) {
             x = 4;
-        } else if (y <= 70) {
-            x = 5;
         } else if (y <= 80) {
-            x = 6;
+            x = 5;
         } else if (y <= 90) {
-            x = 7;
+            x = 6;
         } else if (y <= 95) {
+            x = 7;
+        } else if (y <= 100) {
             x = 8;
         } else if (y <= 105) {
             x = 9;

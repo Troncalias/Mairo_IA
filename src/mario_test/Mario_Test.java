@@ -19,8 +19,7 @@ public class Mario_Test {
      */
     public static void main(String[] args) throws IOException, CloneNotSupportedException {
         // TODO code application logic here
-        Start s = new Start("f");
-        s.start();
+        Start s = new Start();
     }
     
 }
