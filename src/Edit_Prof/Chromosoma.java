@@ -14,7 +14,7 @@ import luigi.RunResult;
  *
  * @author tronc
  */
-public class Chromosome {
+public class Chromosoma {
 
     //Informações para iniciar um array do inicio
     private List<Gene> genes;
@@ -29,28 +29,45 @@ public class Chromosome {
     private int stage;
     private String reason;
 
-    public Chromosome(int size) {
+    /**
+     * Criar uma Chromosoma novo com um determinado tamanho
+     * @param size 
+     */
+    public Chromosoma(int size) {
         this.genes = new ArrayList();
         this.startGenes(size);
     }
 
-    public Chromosome(int reward, int score, int time, int distance, int coins, int world, int stage, String reason, Integer[] g) {
-        this.distance = distance;
-        this.reward = reward;
-        this.score = score;
-        this.time = time;
-        this.coins = coins;
-        this.world = world;
-        this.stage = stage;
-        this.reason = reason;
+    /**
+     * Criar um novo Chromosoma com os dados retirados de um ficheiro
+     * @param string
+     */
+    public Chromosoma(String string) {
+        String[] list = string.split(";");
+        
+        this.reward = Integer.parseInt(list[0]);
+        this.score = Integer.parseInt(list[1]);
+        this.time = Integer.parseInt(list[2]);
+        this.distance = Integer.parseInt(list[3]);
+        this.coins = Integer.parseInt(list[4]);
+        this.world = Integer.parseInt(list[5]);
+        this.stage = Integer.parseInt(list[6]);
+        this.reason = list[7];
 
+        String[] values = list[8].split(",");
         this.genes = new ArrayList();
-        for (int i = 0; i < g.length; i++) {
-            this.genes.add(new Gene(g[i]));
+        
+        for (String value : values) {
+            this.genes.add(new Gene(Integer.parseInt(value)));
         }
+        
     }
 
-    public Chromosome(Chromosome c) {
+    /**
+     * Criar um novo Chromosoma a partir das informações de outro
+     * @param c 
+     */
+    public Chromosoma(Chromosoma c) {
         this.coins = c.getCoins();
         this.score = c.getScore();
         this.reward = c.getReward();
@@ -62,21 +79,6 @@ public class Chromosome {
 
         this.genes = new ArrayList();
         this.genes.addAll(c.getGenes());
-    }
-
-    public Chromosome(Chromosome c, int to_add) {
-        this.coins = c.getCoins();
-        this.score = c.getScore();
-        this.reward = c.getReward();
-        this.time = c.getTime();
-        this.world = c.getWorld();
-        this.stage = c.getStage();
-        this.distance = c.getDistance();
-        this.reason = c.getReason();
-
-        this.genes = new ArrayList();
-        this.genes.addAll(c.getGenes());
-        this.startGenes(to_add);
     }
 
     /**
@@ -91,7 +93,7 @@ public class Chromosome {
             
             if(g.getX() == 2 || g.getX() == 4 || g.getX() == 5 || g.getX() == 7 || g.getX() == 9){
                 int y = ThreadLocalRandom.current().nextInt(1, 100);
-                if(y <= 40 && i<add){
+                if(y <= 30 && i+1<add){
                     genes.add(g);
                     i++;
                 }
@@ -104,32 +106,20 @@ public class Chromosome {
      * @param add 
      */
     public void incresseSizeGenes(int add) {
-        Gene g;
-        for (int i = 0; i < add; i++) {
-            g = new Gene();
-            genes.add(g);
-            
-            if(g.getX() == 2 || g.getX() == 4 || g.getX() == 5 || g.getX() == 7 || g.getX() == 9){
-                int y = ThreadLocalRandom.current().nextInt(1, 100);
-                if(y <= 40 && i<add){
-                    genes.add(g);
-                    i++;
-                }
-            }
-        }
+        this.startGenes(add);
     }
     
     /**
      * Adicionar a lista os Genes de outra tentativa (Para o tipo de jogo FOREVER)
      * @param c 
      */
-    public void addOtherGenes(Chromosome c){
+    public void addOtherGenes(Chromosoma c){
         this.genes.addAll(c.getGenes());
     }
 
     /**
-     * Serve para remover 
-     * @param removed 
+     * Serve para remover uma quantidade de Genes especifica
+     * @param removed a quantidade de genes a serem removidos
      * @return Lista de Genes removidos noum novo Chromosome
      */
     public List<Gene> removeGenes(int removed) {
@@ -175,6 +165,10 @@ public class Chromosome {
     public void addGene(Gene g){
         this.genes.add(g);
     }
+    
+    public void addGene(int i){
+        this.genes.add(new Gene(i));
+    }
 
     public void setValues(Integer[] values){
         this.genes = new ArrayList();
@@ -186,15 +180,14 @@ public class Chromosome {
     
     /**
      * Possibilidade de mudar os comandos que são executados
-     *
-     * @param chance
-     * @param start
-     * @param finish
+     * @param start a posição inicial dos genes em que os comandos podem ser modificados
+     * @param finish a posição final  dos genes em que os comandos podem ser modificados
+     * @param indice_de_mutação a probabilidade de estes mudarem
      * @return
      * @throws java.lang.CloneNotSupportedException
      */
-    public Chromosome mutate(int start, int finish) throws CloneNotSupportedException {
-        Chromosome ret = this.replicar();
+    public Chromosoma mutate(int start, int finish, int indice_de_mutação) throws CloneNotSupportedException {
+        Chromosoma ret = this.replicar();
 
         if (start < finish) {
             if (start <= 0) {
@@ -209,8 +202,8 @@ public class Chromosome {
         }
 
         for (int i = start; i < finish; i++) {
-            int y = ThreadLocalRandom.current().nextInt(1, 10);
-            if (y <= 10) {
+            int y = ThreadLocalRandom.current().nextInt(1, 100);
+            if (y <= indice_de_mutação) {
                 ret.getGene(i).newRandom();
             } 
         }
@@ -219,13 +212,13 @@ public class Chromosome {
     }
 
     /**
-     *
-     * @param c
-     * @param chance
-     * @return
+     * Crusamento entre Chromosomas
+     * @param c chromosoma que este vai se cruzar
+     * @param chance a probabilidade de mudificação com o chromosoma que este se crusa
+     * @return retorna o crusamento
      */
-    public Chromosome cross(Chromosome c, int chance) {
-        Chromosome ret = new Chromosome(0);
+    public Chromosoma cross(Chromosoma c, int chance) {
+        Chromosoma ret = new Chromosoma(0);
         int i = 0;
         int y;
 
@@ -253,6 +246,11 @@ public class Chromosome {
         return ret;
     }
 
+    /**
+     * Retorna os comandos no tamanho desejado
+     * @param repeat a quantidade de vezes que cada comando repete
+     * @return retorno da lista de comandos no tamanho desejado no formato Integer
+     */
     public Integer[] comandsGameSize(int repeat) {
         int j = this.genes.size() * repeat;
         Integer[] list = new Integer[j];
@@ -266,6 +264,10 @@ public class Chromosome {
         return list;
     }
 
+    /**
+     * Retorno da lista de comandos no formato que estes estão atulamente
+     * @return lista de comandos no formato Integer
+     */
     public Integer[] comandsNormalSize() {
         Integer[] list = new Integer[this.genes.size()];
         for (int i = 0; i < this.genes.size(); i++) {
@@ -275,7 +277,11 @@ public class Chromosome {
         return list;
     }
 
-    public String toSaveF() {
+    /**
+     * Formato em que os dados deste Chromosoma são guardados
+     * @return String dos dados deste Chromosoma
+     */
+    public String toSave() {
         StringBuilder s = new StringBuilder();
         //int reward, int score, int time, int distance, int coins, int world, int stage, String reason, Integer[] g
         s.append(Integer.toString(reward)).append(";").append(score).append(";").append(time).append(";").append(distance).append(";").append(coins).append(";").
@@ -292,7 +298,10 @@ public class Chromosome {
         return v;
     }
 
-    
+    /**
+     * Introduzir os resultados obtidos após uma tentativa
+     * @param r retorno da execução do RunResult
+     */
     public void setResults(RunResult r){
         this.distance = r.getX_pos();
         this.reward = r.getReward();
@@ -306,7 +315,7 @@ public class Chromosome {
     
     /**
      * Verefica se passou o nivel no modo LEVEL
-     * @return 
+     * @return true se passpou, false se não
      */
     public Boolean passL(){
         return this.reason.equals("win");
@@ -314,17 +323,21 @@ public class Chromosome {
     
     /**
      * Verefica se passou o nivel no modo CONTINUO
-     * @param world
-     * @param stage
-     * @return 
+     * @param world world na qual esta tentativa se enquadra
+     * @param stage stage na qual esta tentativa se enquadra
+     * @return true se passpou, false se não
      */
     public Boolean passC(int world, int stage){
         return !(this.world == world && this.stage == stage);
     }
     
-    
-    public Chromosome replicar() throws CloneNotSupportedException  {
-        return new Chromosome(this);
+    /**
+     * Replica este Chromosoma
+     * @return Este Chromosoma como um novo
+     * @throws CloneNotSupportedException 
+     */
+    public Chromosoma replicar() throws CloneNotSupportedException  {
+        return new Chromosoma(this);
     }
 
     public List<Gene> getGenes() {

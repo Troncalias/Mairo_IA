@@ -99,6 +99,9 @@ public class Gene {
     public void setX(int x) {
         if (x >= 0 && x <= 11) {
             this.x = x;
+        }else{
+            this.x = x;
+            this.newRandom();
         }
     }
 

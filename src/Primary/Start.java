@@ -6,7 +6,7 @@
 package Primary;
 
 import Controlo.Butao_finalizar;
-import Edit_Prof.Chromosome;
+import Edit_Prof.Chromosoma;
 import Edit_Prof.Jenetic_L;
 import java.io.IOException;
 import java.util.logging.Level;
@@ -26,19 +26,28 @@ public class Start {
         //Integer[] solution, String level, String render, String mode
 
         Butao_finalizar b = new Butao_finalizar();
-        MarioUtils m = new MarioUtils("192.168.1.7");
+        MarioUtils m = new MarioUtils("192.168.1.2");
+        Integer[] chances = new Integer[]{100,20,10,10};
 
-        Jenetic_L[] lista = new Jenetic_L[32];
+        Jenetic_L[] lista = new Jenetic_L[8];
         int l = 0;
-        for (int i = 1; i < 9; i++) {
+        for (int i = 1; i < 3; i++) {
             for (int y = 1; y < 5; y++) {
-                //int world, int stage, String fileF, String fileS, MarioUtils m
-                lista[l] = new Jenetic_L(i, y, "files/Level/Failures/Level_" + i + "_" + y + ".csv", "files/Level/Success/Level_" + i + "_" + y + ".csv", m);
-                l++;
+                if(!b.isFinalizar()){
+                    //int world, int stage, String fileF, String fileS, MarioUtils m
+                    lista[l] = new Jenetic_L(i, y, chances[y], "files/Level/Failures/Level_" + i + "_" + y + ".csv", "files/Level/Success/Level_" + i + "_" + y + ".csv", m);
+                    b.setWorld(lista[l].getWorld());
+                    b.setStage(lista[l].getStage());
+                    lista[l].run(b);
+                    l++;
+                }
             }
         }
+        b.setVisible(false);
+        b.setDefaultCloseOperation(0);
 
-        for (int i = 0; i < 32; i++) {
+        /**
+        for (int i = 0; i < 8; i++) {
             b.setWorld(lista[i].getWorld());
             b.setStage(lista[i].getStage());
             try {
@@ -48,14 +57,14 @@ public class Start {
             }
             lista[i].lastSave();
             if (!lista[i].getLista_s().isEmpty()) {
-                Chromosome c = lista[i].getLista_s().get(0);
+                Chromosoma c = lista[i].getLista_s().get(0);
                 Request req = new Request(c.comandsGameSize(1), "SuperMarioBros-" + lista[i].getWorld() + "-" + lista[i].getStage() + "-v0", "false", "level");
                 RunResult r = m.goMarioGo(req);
 
                 //m.submitToLeaderboard(r, "Let's a go!", "forever");
             } else {
                 if (!lista[i].getLista_f().isEmpty()) {
-                    Chromosome c = lista[i].getLista_f().get(0);
+                    Chromosoma c = lista[i].getLista_f().get(0);
                     Request req = new Request(c.comandsGameSize(5), "SuperMarioBros-" + lista[i].getWorld() + "-" + lista[i].getStage() + "-v0", "false", "level");
                     RunResult r = m.goMarioGo(req);
 
@@ -65,7 +74,7 @@ public class Start {
         }
 
         b.setVisible(false);
-        b.setDefaultCloseOperation(0);
+        b.setDefaultCloseOperation(0);**/
     }
 
     
