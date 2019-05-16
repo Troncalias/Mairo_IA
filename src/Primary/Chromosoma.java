@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package Edit_Prof;
+package Primary;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -147,7 +147,7 @@ public class Chromosoma {
      * @return 
      */
     public Gene removeLastGene(){
-        return this.genes.remove(this.genes.size());
+        return this.genes.remove(this.genes.size()-1);
     }
     
     /**

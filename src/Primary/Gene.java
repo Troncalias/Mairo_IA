@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package Edit_Prof;
+package Primary;
 
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -21,11 +21,11 @@ public class Gene {
 
     public Gene() {
         int y = ThreadLocalRandom.current().nextInt(1, 120);
-        if (y <= 20) {
+        if (y <= 15) {
             x = 1;
-        } else if (y <= 35) {
+        } else if (y <= 25) {
             x = 2;
-        } else if (y <= 45) {
+        } else if (y <= 40) {
             x = 3;
         } else if (y <= 60) {
             x = 4;

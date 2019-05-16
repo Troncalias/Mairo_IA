@@ -6,7 +6,6 @@
 package Primary;
 
 import Controlo.Butao_finalizar;
-import Edit_Prof.Jenetic_L;
 import java.io.IOException;
 import luigi.MarioUtils;
 
@@ -21,19 +20,19 @@ public class Start {
         //Integer[] solution, String level, String render, String mode
 
         Butao_finalizar b = new Butao_finalizar();
-        MarioUtils m = new MarioUtils("172.20.131.224");
-        //Integer[] chances = new Integer[]{100,20,10,10};
+        MarioUtils m = new MarioUtils("192.168.1.9");
+        //Integer[] chances = new Integer[]{20,10,10,10};
 
         Jenetic_L[] lista = new Jenetic_L[8];
         int l = 0;
         for (int i = 1; i < 3; i++) {
-            for (int y = 1; y < 5; y = y+2) {
+            for (int y = 3; y < 5; y = y+2) {
                 if(!b.isFinalizar()){
                     //int world, int stage, String fileF, String fileS, MarioUtils m
-                    lista[l] = new Jenetic_L(i, y, 100, "files/Level/Failures/Level_" + i + "_" + y + ".csv", "files/Level/Success/Level_" + i + "_" + y + ".csv", m);
+                    lista[l] = new Jenetic_L(i, y, 50, "files/Level/Failures/Level_" + i + "_" + y + ".csv", "files/Level/Success/Level_" + i + "_" + y + ".csv", m);
                     b.setWorld(lista[l].getWorld());
                     b.setStage(lista[l].getStage());
-                    lista[l].run(b);
+                    lista[l].run(b, true);
                     l++;
                 }
             }

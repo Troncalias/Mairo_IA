@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package Edit_Prof;
+package Primary;
 
 import Controlo.Butao_finalizar;
 import java.io.BufferedReader;
@@ -136,7 +136,7 @@ public class Jenetic_L {
      *
      * @param chrom Chromosoma que vai ser adicionado a lista
      * @param lista lista a adicionar o Chromosoma
-     * @return 
+     * @return
      */
     public List<Chromosoma> addChromosome(Chromosoma chrom, List<Chromosoma> lista) {
         boolean added = false;
@@ -171,149 +171,186 @@ public class Jenetic_L {
      * Execução do código principal
      *
      * @param b Butão de controlo de execução
+     * @param a define se vai vereficar a lista de sucesso
      * @throws CloneNotSupportedException
      * @throws IOException
      */
-    public void run(Butao_finalizar b) throws CloneNotSupportedException, IOException {
+    public void run(Butao_finalizar b, boolean a) throws CloneNotSupportedException, IOException {
 
-        boolean existeng;
-
-        Chromosoma c;
-        Chromosoma d;
-        boolean pass = false;
-        int i = 0, l = 0, k = 0;
-
-        if (this.lista_falhada.isEmpty()) {
-            c = new Chromosoma(40);
-            this.currentBestReward = 0;
-            existeng = false;
-        } else {
-            this.bestPassRecord();
-            c = this.lista_falhada.get(0).replicar();
-            existeng = true;
+        if (!this.lista_sucesso.isEmpty()) {
+            if (a) {
+                this.verefyPastSuccessfullRuns(b);
+            }
         }
-        b.setReward(this.currentBestReward);
-        b.setMinimo_proxima(this.currentBestReward + 150);
-        b.setMelhor_atingido(this.currentBestReward, "no_more_comands");
-        b.setVisible(true);
 
-        while (!pass) {
-            //Executar uma tentativa
-            Request req;
-            if(k == 20){
-                req = new Request(c.comandsGameSize(5), "SuperMarioBros-" + this.world + "-" + this.stage + "-v0", "true", "level");
-                k=1;
-            }else{
-                req = new Request(c.comandsGameSize(5), "SuperMarioBros-" + this.world + "-" + this.stage + "-v0", "false", "level");
-                k++;
-            }
-            RunResult r = this.mario.goMarioGo(req);
-            c.setResults(r);
-            System.out.println(r.toString());
+        if (this.lista_sucesso.isEmpty()) {
+            boolean existeng;
+            Chromosoma c;
+            Chromosoma d = new Chromosoma(0);
+            Chromosoma anterior;
 
-            //Aumentar a quantidade de tentativas no final
-            b.setTries(b.getTries() + 1);
-
-            //Vereficar se a tentativa atual passou o nivel
-            if (c.passC(world, stage)) {
-                d = c.replicar();
-                this.correctSuccessRun(d);
-                pass = true;
-            } else {
-                if (i == 20) {
-                    l++;
-                }
-
-                if (!existeng) {
-                    //Adicionar tentativa a list de tentativas falhadas
-                    d = c.replicar();
-                    lista_falhada = this.addChromosome(d, lista_falhada);
-                    this.save();
-
-                }
-                if(b.getMelhor_atingido() < c.getReward()){
-                    b.setMelhor_atingido(c.getReward(), c.getReason());
-                }
-
-                //Mudificar este dependendo da situação atual
-                if (this.currentBestReward + 150 > c.getReward()) {
-                    c = c.mutate(c.getGenes().size() - 40 - 8 * l, c.getGenes().size(), this.change_possibility);
-                    i++;
-                } else if (c.getReason().equals("death")) {
-                    c = c.mutate(c.getGenes().size() - 40 - 8 * l, c.getGenes().size(), this.change_possibility);
-                    i++;
-                } else {
-                    this.currentBestReward = c.getReward();
-                    b.setReward(this.currentBestReward);
-                    b.setMinimo_proxima(this.currentBestReward + 150);
-                    b.setMelhor_atingido(this.currentBestReward, c.getReason());
-                    c.incresseSizeGenes(40);
-                    i = 0;
-                    l = 0;
-                }
+            if (this.lista_falhada.isEmpty()) {
+                c = new Chromosoma(40);
+                this.currentBestReward = 0;
+                anterior = new Chromosoma(0);
+                anterior.setReward(0);
                 existeng = false;
-            }
-            if (b.isFinalizar()) {
-                pass = true;
+            } else {
+                this.bestPassRecord();
+                c = this.lista_falhada.get(0).replicar();
+                anterior = this.lista_falhada.get(0).replicar();
+                existeng = true;
             }
 
+            int i = 0, l = 0, k = 0, q = 0;
+
+            b.setReward(this.currentBestReward);
+            b.setMinimo_proxima(this.currentBestReward + 150);
+            b.setMelhor_atingido(this.currentBestReward, "no_more_comands");
+            b.setVisible(true);
+
+            while (true) {
+                //Executar uma tentativa
+                Request req;
+                RunResult r;
+                Integer[] in = c.comandsGameSize(5);
+                if (k == 20) {
+                    req = new Request(in, "SuperMarioBros-" + this.world + "-" + this.stage + "-v0", "true", "level");
+                    k = 1;
+                } else {
+                    req = new Request(in, "SuperMarioBros-" + this.world + "-" + this.stage + "-v0", "false", "level");
+                    k++;
+                }
+
+                r = this.mario.goMarioGo(req);
+                c.setResults(r);
+                System.out.println(r.toString());
+
+                //Aumentar a quantidade de tentativas no final
+                b.setTries(b.getTries() + 1);
+
+                //Vereficar se a tentativa atual passou o nivel
+                if (c.getReason().equals("win")) {
+                    d = c.replicar();
+                    this.correctSuccessRun(d, r);
+                    break;
+                } else {
+
+                    if (i == 20) {
+                        l++;
+                    }
+
+                    if (!existeng) {
+                        anterior = d.replicar();
+                        //Adicionar tentativa a list de tentativas falhadas
+                        d = c.replicar();
+                        lista_falhada = this.addChromosome(d, lista_falhada);
+                        this.save_fails();
+
+                    }
+                    existeng = false;
+
+                    //Vereficar se o anterior tem melhor resultado que o atual
+                    if (anterior.getReward() > c.getReward()) {
+                        c = anterior.replicar();
+                    }
+
+                    //Vereficar se o resultado melhor passado é melhor que o atual
+                    if (b.getMelhor_atingido() < c.getReward()) {
+                        b.setMelhor_atingido(c.getReward(), c.getReason());
+                    }
+
+                    //Mudificar este dependendo da situação atual
+                    if (this.currentBestReward + 150 > c.getReward()) {
+                        c = c.mutate(c.getGenes().size() - 40 - 8 * l, c.getGenes().size(), this.change_possibility);
+                        i++;
+                    } else if (c.getReason().equals("death")) {
+                        c = c.mutate(c.getGenes().size() - 40 - 8 * l, c.getGenes().size(), this.change_possibility);
+                        i++;
+                    } else {
+                        this.currentBestReward = c.getReward();
+                        b.setReward(this.currentBestReward);
+                        b.setMinimo_proxima(this.currentBestReward + 150);
+                        b.setMelhor_atingido(this.currentBestReward, c.getReason());
+                        anterior = new Chromosoma(c);
+                        c.incresseSizeGenes(40);
+                        i = 0;
+                        l = 0;
+                    }
+
+                }
+                if (b.isFinalizar()) {
+                    break;
+                }
+
+            }
         }
     }
 
-    public void correctSuccessRun(Chromosoma c) throws IOException {
+    public void correctSuccessRun(Chromosoma c, RunResult r) throws IOException {
         Chromosoma s = new Chromosoma(c);
         s.setValues(c.comandsGameSize(5));
         List<Gene> i = new ArrayList();
-        boolean b = false;
+        boolean not_pass = true;
 
-        while (!b) {
+        while (s.getGenes().size() != r.getCommands_used()) {
             i.add(s.removeLastGene());
-            Request req = new Request(c.comandsNormalSize(), "SuperMarioBros-" + this.world + "-" + this.stage + "-v0", "false", "level");
-            RunResult r = this.mario.goMarioGo(req);
+        }
+        i.add(s.removeLastGene());
+
+        while (not_pass) {
+            Request req = new Request(s.comandsNormalSize(), "SuperMarioBros-" + this.world + "-" + this.stage + "-v0", "false", "level");
+            r = this.mario.goMarioGo(req);
             s.setResults(r);
 
-            if (!s.getReason().equals("win")) {
-                while (!s.getReason().equals("win")) {
+            if (s.getReason().equals("win")) {
+                not_pass = false;
+            } else {
+                if (!i.isEmpty()) {
                     s.addGene(i.remove(i.size() - 1));
-                    req = new Request(c.comandsNormalSize(), "SuperMarioBros-" + this.world + "-" + this.stage + "-v0", "false", "level");
-                    r = this.mario.goMarioGo(req);
-                    s.setResults(r);
-                    b = true;
+                } else {
+                    s.addGene(s.getGene(s.getGenes().size() - 1));
                 }
             }
         }
+
+        Request req = new Request(s.comandsNormalSize(), "SuperMarioBros-" + this.world + "-" + this.stage + "-v0", "true", "level");
+        this.mario.goMarioGo(req);
+
         this.lista_sucesso = this.addChromosome(s, this.lista_sucesso);
-        this.save();
+        this.save_success();
     }
 
     /**
-     * Para implementar como teste
+     * Para implementar como teste das tentativas realizadas
      *
      * @return
      */
-    private List<Integer> verefyPasRuns() {
-        List<Integer> l = new ArrayList();
-        for (int i = 0; i < this.lista_falhada.size(); i++) {
-            if (this.lista_falhada.get(i).passC(world, stage)) {
-                l.add(i);
+    private void verefyPastSuccessfullRuns(Butao_finalizar b) throws CloneNotSupportedException, IOException {
+        RunResult r;
+        for (int i = 0; i < this.lista_sucesso.size(); i++) {
+            Integer[] in = this.lista_sucesso.get(i).comandsNormalSize();
+            Request req = new Request(in, "SuperMarioBros-" + this.world + "-" + this.stage + "-v0", "true", "level");
+            r = this.mario.goMarioGo(req);
+            System.out.println(r.toString());
+            if (!r.getReason_finish().equals("win")) {
+                this.lista_sucesso.remove(i);
+                i--;
             }
         }
-        return l;
-    }
-
-    /**
-     * Corrigir run para Modo continuo
-     *
-     * @param m
-     * @param r
-     * @param c
-     */
-    private void fixingRun(MarioUtils m, RunResult r, Chromosoma c) {
-
+        this.save_success();
+        if (this.lista_sucesso.isEmpty()) {
+            this.run(b, false);
+        }
+        this.run(b, false);
     }
 
     public void save() throws IOException {
+        this.save_fails();
+        this.save_success();
+    }
 
+    public void save_fails() throws IOException {
         File filef = new File(this.fileF);
         try (FileWriter Fstream = new FileWriter(filef, false)) {
             for (int i = 0; i < this.lista_falhada.size(); i++) {
@@ -322,7 +359,9 @@ public class Jenetic_L {
             }
             Fstream.flush();
         }
+    }
 
+    public void save_success() throws IOException {
         File files = new File(this.fileS);
         try (FileWriter Sstream = new FileWriter(files, false)) {
             for (int i = 0; i < this.lista_sucesso.size(); i++) {
@@ -330,7 +369,6 @@ public class Jenetic_L {
             }
             Sstream.flush();
         }
-
     }
 
     public void addChromoF(Chromosoma c) {
