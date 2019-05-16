@@ -5,6 +5,8 @@
  */
 package Controlo;
 
+import javax.swing.JLabel;
+
 /**
  *
  * @author tronc
@@ -14,6 +16,9 @@ public class Butao_finalizar extends javax.swing.JFrame {
     private int world;
     private int stage;
     private int tries = 0;
+    private int reward;
+    private int minimo_proxima = 0;
+    private int melhor_atingido = 0;
     private boolean finalizar = false;
 
     /**
@@ -88,6 +93,37 @@ public class Butao_finalizar extends javax.swing.JFrame {
     public boolean isFinalizar() {
         return finalizar;
     }
+
+    public int getReward() {
+        return reward;
+    }
+
+    public void setReward(int reward) {
+        this.reward = reward;
+        this.Reward.setText(reward + "");
+    }
+
+    public int getMinimo_proxima() {
+        return minimo_proxima;
+    }
+
+    public void setMinimo_proxima(int minimo_proxima) {
+        this.minimo_proxima = minimo_proxima;
+        this.Minimo.setText(minimo_proxima + "");
+    }
+
+    public int getMelhor_atingido() {
+        return melhor_atingido;
+    }
+
+    public void setMelhor_atingido(int melhor_atingido, String reason) {
+        this.melhor_atingido = melhor_atingido;
+        this.Melhor_Ultima.setText(reason + ": " + melhor_atingido);
+    }
+
+    
+    
+    
     
     
 
@@ -107,6 +143,12 @@ public class Butao_finalizar extends javax.swing.JFrame {
         Stage = new javax.swing.JLabel();
         jLabel3 = new javax.swing.JLabel();
         Tryes = new javax.swing.JLabel();
+        jLabel4 = new javax.swing.JLabel();
+        Reward = new javax.swing.JLabel();
+        jLabel5 = new javax.swing.JLabel();
+        Minimo = new javax.swing.JLabel();
+        jLabel6 = new javax.swing.JLabel();
+        Melhor_Ultima = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -129,31 +171,69 @@ public class Butao_finalizar extends javax.swing.JFrame {
 
         Tryes.setText("0");
 
+        jLabel4.setText("Melhor Reward Atual");
+
+        Reward.setText("0");
+
+        jLabel5.setText("Minimo para proxima");
+
+        Minimo.setText("0");
+
+        jLabel6.setText("Melhor das ultimas");
+
+        Melhor_Ultima.setText("0");
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addGap(70, 70, 70)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addGroup(layout.createSequentialGroup()
-                            .addComponent(jLabel2)
-                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                            .addComponent(Stage))
-                        .addGroup(layout.createSequentialGroup()
-                            .addComponent(jLabel1)
-                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                            .addComponent(World))
-                        .addGroup(layout.createSequentialGroup()
-                            .addGap(8, 8, 8)
-                            .addComponent(Butao_Acabar)))
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(jLabel3)
-                        .addGap(18, 18, 18)
-                        .addComponent(Tryes)
-                        .addGap(11, 11, 11)))
-                .addContainerGap(72, Short.MAX_VALUE))
+                .addContainerGap(56, Short.MAX_VALUE)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(jLabel1)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(World)
+                                .addGap(49, 49, 49)
+                                .addComponent(jLabel2)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addComponent(Stage))
+                            .addGroup(layout.createSequentialGroup()
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addGroup(layout.createSequentialGroup()
+                                        .addGap(51, 51, 51)
+                                        .addComponent(Reward)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 60, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                    .addComponent(jLabel4))
+                                .addGap(68, 68, 68))
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(Butao_Acabar)
+                                .addGap(6, 6, 6)))
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(layout.createSequentialGroup()
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addGroup(layout.createSequentialGroup()
+                                        .addGap(43, 43, 43)
+                                        .addComponent(jLabel3)
+                                        .addGap(18, 18, 18)
+                                        .addComponent(Tryes))
+                                    .addGroup(layout.createSequentialGroup()
+                                        .addGap(14, 14, 14)
+                                        .addComponent(jLabel5)))
+                                .addGap(52, 52, 52))
+                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(Minimo)
+                                .addGap(105, 105, 105))))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jLabel6, javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                                .addComponent(Melhor_Ultima)
+                                .addGap(52, 52, 52)))
+                        .addGap(175, 175, 175))))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -161,18 +241,26 @@ public class Butao_finalizar extends javax.swing.JFrame {
                 .addGap(32, 32, 32)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel1)
-                    .addComponent(World))
-                .addGap(18, 18, 18)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(World)
                     .addComponent(jLabel2)
-                    .addComponent(Stage))
-                .addGap(18, 18, 18)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(Stage)
                     .addComponent(jLabel3)
                     .addComponent(Tryes))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 44, Short.MAX_VALUE)
+                .addGap(18, 18, 18)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel4)
+                    .addComponent(jLabel5))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(Reward)
+                    .addComponent(Minimo))
+                .addGap(18, 18, 18)
+                .addComponent(jLabel6)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(Melhor_Ultima)
+                .addGap(18, 18, 18)
                 .addComponent(Butao_Acabar)
-                .addGap(26, 26, 26))
+                .addContainerGap(32, Short.MAX_VALUE))
         );
 
         pack();
@@ -186,11 +274,17 @@ public class Butao_finalizar extends javax.swing.JFrame {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton Butao_Acabar;
+    private javax.swing.JLabel Melhor_Ultima;
+    private javax.swing.JLabel Minimo;
+    private javax.swing.JLabel Reward;
     private javax.swing.JLabel Stage;
     private javax.swing.JLabel Tryes;
     private javax.swing.JLabel World;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
+    private javax.swing.JLabel jLabel4;
+    private javax.swing.JLabel jLabel5;
+    private javax.swing.JLabel jLabel6;
     // End of variables declaration//GEN-END:variables
 }

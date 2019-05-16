@@ -6,14 +6,9 @@
 package Primary;
 
 import Controlo.Butao_finalizar;
-import Edit_Prof.Chromosoma;
 import Edit_Prof.Jenetic_L;
 import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import luigi.MarioUtils;
-import luigi.Request;
-import luigi.RunResult;
 
 /**
  *
@@ -26,16 +21,16 @@ public class Start {
         //Integer[] solution, String level, String render, String mode
 
         Butao_finalizar b = new Butao_finalizar();
-        MarioUtils m = new MarioUtils("192.168.1.2");
-        Integer[] chances = new Integer[]{100,20,10,10};
+        MarioUtils m = new MarioUtils("172.20.131.224");
+        //Integer[] chances = new Integer[]{100,20,10,10};
 
         Jenetic_L[] lista = new Jenetic_L[8];
         int l = 0;
         for (int i = 1; i < 3; i++) {
-            for (int y = 1; y < 5; y++) {
+            for (int y = 1; y < 5; y = y+2) {
                 if(!b.isFinalizar()){
                     //int world, int stage, String fileF, String fileS, MarioUtils m
-                    lista[l] = new Jenetic_L(i, y, chances[y], "files/Level/Failures/Level_" + i + "_" + y + ".csv", "files/Level/Success/Level_" + i + "_" + y + ".csv", m);
+                    lista[l] = new Jenetic_L(i, y, 100, "files/Level/Failures/Level_" + i + "_" + y + ".csv", "files/Level/Success/Level_" + i + "_" + y + ".csv", m);
                     b.setWorld(lista[l].getWorld());
                     b.setStage(lista[l].getStage());
                     lista[l].run(b);
@@ -45,6 +40,7 @@ public class Start {
         }
         b.setVisible(false);
         b.setDefaultCloseOperation(0);
+        System.exit(0);
 
         /**
         for (int i = 0; i < 8; i++) {

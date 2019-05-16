@@ -12,7 +12,6 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import luigi.MarioUtils;
 import luigi.Request;
@@ -37,7 +36,7 @@ public class Jenetic_L {
     private final String fileS;
 
     private int currentBestReward = 0;
-    private MarioUtils mario;
+    private final MarioUtils mario;
 
     /**
      * Construtor do gestor das tentativas deste stage
@@ -182,7 +181,7 @@ public class Jenetic_L {
         Chromosoma c;
         Chromosoma d;
         boolean pass = false;
-        int i = 0, l = 0;
+        int i = 0, l = 0, k = 0;
 
         if (this.lista_falhada.isEmpty()) {
             c = new Chromosoma(40);
@@ -193,11 +192,21 @@ public class Jenetic_L {
             c = this.lista_falhada.get(0).replicar();
             existeng = true;
         }
+        b.setReward(this.currentBestReward);
+        b.setMinimo_proxima(this.currentBestReward + 150);
+        b.setMelhor_atingido(this.currentBestReward, "no_more_comands");
         b.setVisible(true);
 
         while (!pass) {
             //Executar uma tentativa
-            Request req = new Request(c.comandsGameSize(5), "SuperMarioBros-" + this.world + "-" + this.stage + "-v0", "false", "level");
+            Request req;
+            if(k == 20){
+                req = new Request(c.comandsGameSize(5), "SuperMarioBros-" + this.world + "-" + this.stage + "-v0", "true", "level");
+                k=1;
+            }else{
+                req = new Request(c.comandsGameSize(5), "SuperMarioBros-" + this.world + "-" + this.stage + "-v0", "false", "level");
+                k++;
+            }
             RunResult r = this.mario.goMarioGo(req);
             c.setResults(r);
             System.out.println(r.toString());
@@ -211,7 +220,7 @@ public class Jenetic_L {
                 this.correctSuccessRun(d);
                 pass = true;
             } else {
-                if (i == 50) {
+                if (i == 20) {
                     l++;
                 }
 
@@ -222,21 +231,27 @@ public class Jenetic_L {
                     this.save();
 
                 }
-                existeng = false;
+                if(b.getMelhor_atingido() < c.getReward()){
+                    b.setMelhor_atingido(c.getReward(), c.getReason());
+                }
 
                 //Mudificar este dependendo da situação atual
-                if (this.currentBestReward + 200 > c.getReward()) {
-                    c = c.mutate(c.getGenes().size() - 40 - 4 * l, c.getGenes().size(), this.change_possibility);
+                if (this.currentBestReward + 150 > c.getReward()) {
+                    c = c.mutate(c.getGenes().size() - 40 - 8 * l, c.getGenes().size(), this.change_possibility);
                     i++;
                 } else if (c.getReason().equals("death")) {
-                    c = c.mutate(c.getGenes().size() - 40 - 4 * l, c.getGenes().size(), this.change_possibility);
+                    c = c.mutate(c.getGenes().size() - 40 - 8 * l, c.getGenes().size(), this.change_possibility);
                     i++;
                 } else {
                     this.currentBestReward = c.getReward();
+                    b.setReward(this.currentBestReward);
+                    b.setMinimo_proxima(this.currentBestReward + 150);
+                    b.setMelhor_atingido(this.currentBestReward, c.getReason());
                     c.incresseSizeGenes(40);
                     i = 0;
                     l = 0;
                 }
+                existeng = false;
             }
             if (b.isFinalizar()) {
                 pass = true;
@@ -245,7 +260,7 @@ public class Jenetic_L {
         }
     }
 
-    public void correctSuccessRun(Chromosoma c) {
+    public void correctSuccessRun(Chromosoma c) throws IOException {
         Chromosoma s = new Chromosoma(c);
         s.setValues(c.comandsGameSize(5));
         List<Gene> i = new ArrayList();
@@ -268,6 +283,7 @@ public class Jenetic_L {
             }
         }
         this.lista_sucesso = this.addChromosome(s, this.lista_sucesso);
+        this.save();
     }
 
     /**
@@ -299,21 +315,21 @@ public class Jenetic_L {
     public void save() throws IOException {
 
         File filef = new File(this.fileF);
-        FileWriter Fstream = new FileWriter(filef, false);
-        for (int i = 0; i < this.lista_falhada.size(); i++) {
-            String s = this.lista_falhada.get(i).toSave() + "\n";
-            Fstream.write(s);
+        try (FileWriter Fstream = new FileWriter(filef, false)) {
+            for (int i = 0; i < this.lista_falhada.size(); i++) {
+                String s = this.lista_falhada.get(i).toSave() + "\n";
+                Fstream.write(s);
+            }
+            Fstream.flush();
         }
-        Fstream.flush();
-        Fstream.close();
 
         File files = new File(this.fileS);
-        FileWriter Sstream = new FileWriter(files, false);
-        for (int i = 0; i < this.lista_sucesso.size(); i++) {
-            Sstream.write(this.lista_sucesso.get(i).toSave() + "\n");
+        try (FileWriter Sstream = new FileWriter(files, false)) {
+            for (int i = 0; i < this.lista_sucesso.size(); i++) {
+                Sstream.write(this.lista_sucesso.get(i).toSave() + "\n");
+            }
+            Sstream.flush();
         }
-        Sstream.flush();
-        Sstream.close();
 
     }
 
