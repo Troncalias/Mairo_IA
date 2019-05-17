@@ -20,7 +20,7 @@ public class Start {
         //Integer[] solution, String level, String render, String mode
 
         Butao_finalizar b = new Butao_finalizar();
-        MarioUtils m = new MarioUtils("192.168.1.9");
+        MarioUtils m = new MarioUtils("192.168.1.8");
         //Integer[] chances = new Integer[]{20,10,10,10};
 
         Jenetic_L[] lista = new Jenetic_L[8];
@@ -29,7 +29,7 @@ public class Start {
             for (int y = 3; y < 5; y = y+2) {
                 if(!b.isFinalizar()){
                     //int world, int stage, String fileF, String fileS, MarioUtils m
-                    lista[l] = new Jenetic_L(i, y, 50, "files/Level/Failures/Level_" + i + "_" + y + ".csv", "files/Level/Success/Level_" + i + "_" + y + ".csv", m);
+                    lista[l] = new Jenetic_L(i, y, 20, "files/Level/Failures/Level_" + i + "_" + y + ".csv", "files/Level/Success/Level_" + i + "_" + y + ".csv", m, 175);
                     b.setWorld(lista[l].getWorld());
                     b.setStage(lista[l].getStage());
                     lista[l].run(b, true);

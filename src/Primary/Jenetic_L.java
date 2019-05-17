@@ -37,6 +37,8 @@ public class Jenetic_L {
 
     private int currentBestReward = 0;
     private final MarioUtils mario;
+    
+    private final int min_size;
 
     /**
      * Construtor do gestor das tentativas deste stage
@@ -50,15 +52,17 @@ public class Jenetic_L {
      * @param fileS localização do ficheiro que guarda as tentativas que tiveram
      * sucesso
      * @param m necessário para executar as tentativas
+     * @param size
      * @throws IOException
      */
-    public Jenetic_L(int world, int stage, int change_possibility, String fileF, String fileS, MarioUtils m) throws IOException {
+    public Jenetic_L(int world, int stage, int change_possibility, String fileF, String fileS, MarioUtils m, int size) throws IOException {
         this.change_possibility = change_possibility;
         this.world = world;
         this.stage = stage;
         this.fileF = fileF;
         this.fileS = fileS;
         this.mario = m;
+        this.min_size = size;
 
         //Acceder ao ficheiro que guarda os dados FALHADOS deste World/Stage
         File f = new File(fileF);
@@ -105,20 +109,12 @@ public class Jenetic_L {
     private void bestPassRecord() {
         if (!this.lista_falhada.isEmpty()) {
             //O tempo actual maior possivel
-            int time = this.lista_falhada.get(0).getTime();
-
-            //Procurar exatamente o tempo que teria o anterior
-            int i = 0;
-            while (time >= i && i < 400) {
-                i += 10;
-            }
+            int size = this.lista_falhada.get(0).getGenes().size() - 40;
 
             //Procurar pelo tempo anterior passado com sucesso aos if de runToFindSucessRun
             for (int y = 0; y < this.lista_falhada.size(); y++) {
-
-                //Vereficar se este Chromosoma tem o mesmo tempo que a tentativa passada anterior
-                if (this.lista_falhada.get(y).getTime() == i) {
-
+                //
+                if(this.lista_falhada.get(y).getGenes().size() == size){
                     //Vereficar se este Chromosoma não tem como razão de ter parado como morte
                     if (!this.lista_falhada.get(y).getReason().equals("death")) {
 
@@ -185,27 +181,26 @@ public class Jenetic_L {
 
         if (this.lista_sucesso.isEmpty()) {
             boolean existeng;
-            Chromosoma c;
-            Chromosoma d = new Chromosoma(0);
-            Chromosoma anterior;
+            Chromosoma Curent;
+            Chromosoma Best = new Chromosoma(0);
+            Best.setReward(0);
+            Best.setReason("death");
 
             if (this.lista_falhada.isEmpty()) {
-                c = new Chromosoma(40);
+                Curent = new Chromosoma(40);
                 this.currentBestReward = 0;
-                anterior = new Chromosoma(0);
-                anterior.setReward(0);
                 existeng = false;
             } else {
                 this.bestPassRecord();
-                c = this.lista_falhada.get(0).replicar();
-                anterior = this.lista_falhada.get(0).replicar();
+                Curent = this.lista_falhada.get(0).replicar();
                 existeng = true;
             }
 
-            int i = 0, l = 0, k = 0, q = 0;
+            int i = 0, l = 0, k = 0;
 
+            //Painel de controlo
             b.setReward(this.currentBestReward);
-            b.setMinimo_proxima(this.currentBestReward + 150);
+            b.setMinimo_proxima(this.currentBestReward + this.min_size);
             b.setMelhor_atingido(this.currentBestReward, "no_more_comands");
             b.setVisible(true);
 
@@ -213,67 +208,81 @@ public class Jenetic_L {
                 //Executar uma tentativa
                 Request req;
                 RunResult r;
-                Integer[] in = c.comandsGameSize(5);
+                
                 if (k == 20) {
-                    req = new Request(in, "SuperMarioBros-" + this.world + "-" + this.stage + "-v0", "true", "level");
+                    req = new Request(Curent.comandsGameSize(5), "SuperMarioBros-" + this.world + "-" + this.stage + "-v0", "true", "level");
                     k = 1;
                 } else {
-                    req = new Request(in, "SuperMarioBros-" + this.world + "-" + this.stage + "-v0", "false", "level");
+                    req = new Request(Curent.comandsGameSize(5), "SuperMarioBros-" + this.world + "-" + this.stage + "-v0", "false", "level");
                     k++;
                 }
-
                 r = this.mario.goMarioGo(req);
-                c.setResults(r);
+                Curent.setResults(r);
                 System.out.println(r.toString());
 
-                //Aumentar a quantidade de tentativas no final
+                //Aumentar a quantidade de tentativas no painel de controlo
                 b.setTries(b.getTries() + 1);
 
                 //Vereficar se a tentativa atual passou o nivel
-                if (c.getReason().equals("win")) {
-                    d = c.replicar();
-                    this.correctSuccessRun(d, r);
+                if (Curent.getReason().equals("win")) {
+                    Chromosoma Save = Curent.replicar();
+                    this.correctSuccessRun(Save, r);
                     break;
                 } else {
-
                     if (i == 20) {
-                        l++;
+                        if(l < 10){
+                            l++;
+                        }
+                        i = 0;
+                    }
+
+                    //Iniciar anterior
+                    if (Best.getSize() == 0) {
+                        if (!Curent.getReason().equals("death")) {
+                            Best = Curent.replicar();
+                            b.setMelhor_atingido(Best.getReward(), Best.getReason());
+                        } else {
+                            Best = new Chromosoma(0);
+                            Best.setReward(0);
+                            Best.setReason("death");
+                        }
                     }
 
                     if (!existeng) {
-                        anterior = d.replicar();
-                        //Adicionar tentativa a list de tentativas falhadas
-                        d = c.replicar();
-                        lista_falhada = this.addChromosome(d, lista_falhada);
+                        //Guardar ultima tentativa executada
+                        lista_falhada = this.addChromosome(Curent.replicar(), lista_falhada);
                         this.save_fails();
-
+                    } else {
+                        existeng = false;
                     }
-                    existeng = false;
 
                     //Vereficar se o anterior tem melhor resultado que o atual
-                    if (anterior.getReward() > c.getReward()) {
-                        c = anterior.replicar();
+                    if (Curent.getReward() <= Best.getReward() && !Best.getReason().equals("death")) {
+                        Curent = Best.replicar();
                     }
 
-                    //Vereficar se o resultado melhor passado é melhor que o atual
-                    if (b.getMelhor_atingido() < c.getReward()) {
-                        b.setMelhor_atingido(c.getReward(), c.getReason());
+                    if (!Curent.getReason().equals("death") && Best.getReward() <= Curent.getReward()) {
+                        Best = Curent.replicar();
+                        //Caso o executado atual não esteja na lista de falhados
+                        //Vereficar se o resultado melhor passado é melhor que o atual
+                        b.setMelhor_atingido(Best.getReward(), Best.getReason());
                     }
 
                     //Mudificar este dependendo da situação atual
-                    if (this.currentBestReward + 150 > c.getReward()) {
-                        c = c.mutate(c.getGenes().size() - 40 - 8 * l, c.getGenes().size(), this.change_possibility);
+                    if (this.currentBestReward + this.min_size > Curent.getReward()) {
+                        Curent = Curent.mutate(Curent.getGenes().size() - 40 - 8 * l, Curent.getGenes().size(), this.change_possibility);
                         i++;
-                    } else if (c.getReason().equals("death")) {
-                        c = c.mutate(c.getGenes().size() - 40 - 8 * l, c.getGenes().size(), this.change_possibility);
+                    } else if (Curent.getReason().equals("death")) {
+                        Curent = Curent.mutate(Curent.getGenes().size() - 40 - 8 * l, Curent.getGenes().size(), this.change_possibility);
                         i++;
                     } else {
-                        this.currentBestReward = c.getReward();
+                        this.currentBestReward = Curent.getReward();
                         b.setReward(this.currentBestReward);
-                        b.setMinimo_proxima(this.currentBestReward + 150);
-                        b.setMelhor_atingido(this.currentBestReward, c.getReason());
-                        anterior = new Chromosoma(c);
-                        c.incresseSizeGenes(40);
+                        b.setMinimo_proxima(this.currentBestReward + this.min_size);
+                        b.setMelhor_atingido(this.currentBestReward, Curent.getReason());
+                        Best.setReward(0);
+                        Best.setReason("death");
+                        Curent.incresseSizeGenes(40);
                         i = 0;
                         l = 0;
                     }
