@@ -13,7 +13,7 @@ import java.util.concurrent.ThreadLocalRandom;
  */
 public class Gene {
 
-    Integer[] array = new Integer[]{11, 10, 9, 8, 7, 6, 5, 5, 5, 5, 5, 4, 4, 3, 3, 3, 3, 3, 3, 2, 2, 2, 2, 1, 1, 1, 1, 1, 1, 0};
+    Integer[] array = new Integer[]{0, 1, 1, 1, 2, 2, 2, 2, 2, 3, 3, 4, 4, 4, 5, 6, 7, 8, 9, 10, 10, 11};
     private int x;
 
     public Gene(int x) {
@@ -21,7 +21,7 @@ public class Gene {
     }
 
     public Gene() {
-        int y = ThreadLocalRandom.current().nextInt(0, array.length);
+        int y = ThreadLocalRandom.current().nextInt(0, array.length - 1);
         this.x = array[y];
 
     }
@@ -29,7 +29,7 @@ public class Gene {
     public int newRandom() {
         int j = x + 0;
         while (x == j) {
-            int y = ThreadLocalRandom.current().nextInt(0, array.length);
+            int y = ThreadLocalRandom.current().nextInt(0, array.length - 1);
             this.x = array[y];
         }
 

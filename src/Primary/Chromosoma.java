@@ -68,17 +68,19 @@ public class Chromosoma {
      * @param c 
      */
     public Chromosoma(Chromosoma c) {
-        this.coins = c.getCoins();
-        this.score = c.getScore();
-        this.reward = c.getReward();
-        this.time = c.getTime();
-        this.world = c.getWorld();
-        this.stage = c.getStage();
-        this.distance = c.getDistance();
-        this.reason = c.getReason();
-
+        this.coins = c.getCoins() + 0;
+        this.score = c.getScore() + 0;
+        this.reward = c.getReward() + 0;
+        this.time = c.getTime() + 0;
+        this.world = c.getWorld() + 0;
+        this.stage = c.getStage() + 0;
+        this.distance = c.getDistance() + 0;
+        this.reason = c.getReason() + "";
+        
         this.genes = new ArrayList();
-        this.genes.addAll(c.getGenes());
+        for(int i=0; i<c.getGenes().size(); i++){
+            this.genes.add(new Gene(c.getGenes().get(i).getX()));
+        }
     }
 
     /**
@@ -186,8 +188,7 @@ public class Chromosoma {
      * @return
      * @throws java.lang.CloneNotSupportedException
      */
-    public Chromosoma mutate(int start, int finish, int indice_de_mutação) throws CloneNotSupportedException {
-        Chromosoma ret = this.replicar();
+    public void mutate(int start, int finish, int indice_de_mutação) throws CloneNotSupportedException {
 
         if (start < finish) {
             if (start <= 0) {
@@ -204,11 +205,9 @@ public class Chromosoma {
         for (int i = start; i < finish; i++) {
             int y = ThreadLocalRandom.current().nextInt(1, 100);
             if (y <= indice_de_mutação) {
-                ret.getGene(i).newRandom();
+                this.getGene(i).newRandom();
             } 
         }
-
-        return ret;
     }
 
     /**

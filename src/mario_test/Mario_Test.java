@@ -4,8 +4,10 @@
  * and open the template in the editor.
  */
 package mario_test;
+
 import Primary.Start;
 import java.io.IOException;
+
 /**
  *
  * @author tronc
@@ -21,5 +23,5 @@ public class Mario_Test {
         // TODO code application logic here
         Start s = new Start();
     }
-    
+
 }

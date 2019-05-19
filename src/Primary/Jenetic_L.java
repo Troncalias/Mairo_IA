@@ -36,8 +36,9 @@ public class Jenetic_L {
     private final String fileS;
 
     private int currentBestReward = 0;
+    private int size_last_time = 0;
     private final MarioUtils mario;
-    
+
     private final int min_size;
 
     /**
@@ -114,12 +115,13 @@ public class Jenetic_L {
             //Procurar pelo tempo anterior passado com sucesso aos if de runToFindSucessRun
             for (int y = 0; y < this.lista_falhada.size(); y++) {
                 //
-                if(this.lista_falhada.get(y).getGenes().size() == size){
+                if (this.lista_falhada.get(y).getGenes().size() == size) {
                     //Vereficar se este Chromosoma não tem como razão de ter parado como morte
                     if (!this.lista_falhada.get(y).getReason().equals("death")) {
 
                         //Defenir este como o melhor Reward atualmente para comparação e acabar com as buscas
                         this.currentBestReward = this.lista_falhada.get(y).getReward();
+                        this.size_last_time = this.lista_falhada.get(y).getGenes().size();
                         y = this.lista_falhada.size();
                     }
                 }
@@ -137,16 +139,16 @@ public class Jenetic_L {
     public List<Chromosoma> addChromosome(Chromosoma chrom, List<Chromosoma> lista) {
         boolean added = false;
         List<Chromosoma> media = new ArrayList();
-
+        
         for (int i = 0; i < lista.size(); i++) {
             //Vereficar se o tempo do que se adiciona e inferior ao proximo da lista atual
-            if (lista.get(i).getTime() > chrom.getTime()) {
+            if (lista.get(i).getGenes().size() < chrom.getGenes().size()) {
                 if (!added) {
                     media.add(chrom);
                     added = true;
                 }
                 //Vereficar se a lista tem valores a frente
-            } else if (lista.get(i).getTime() == chrom.getTime()) {
+            } else if (lista.get(i).getGenes().size() == chrom.getGenes().size()) {
                 if (lista.get(i).getReward() < chrom.getReward()) {
                     if (!added) {
                         media.add(chrom);
@@ -172,7 +174,6 @@ public class Jenetic_L {
      * @throws IOException
      */
     public void run(Butao_finalizar b, boolean a) throws CloneNotSupportedException, IOException {
-
         if (!this.lista_sucesso.isEmpty()) {
             if (a) {
                 this.verefyPastSuccessfullRuns(b);
@@ -189,6 +190,7 @@ public class Jenetic_L {
             if (this.lista_falhada.isEmpty()) {
                 Curent = new Chromosoma(40);
                 this.currentBestReward = 0;
+                this.size_last_time = 0;
                 existeng = false;
             } else {
                 this.bestPassRecord();
@@ -196,7 +198,7 @@ public class Jenetic_L {
                 existeng = true;
             }
 
-            int i = 0, l = 0, k = 0;
+            int i = 0, l = 0, k = 0, q = 0;
 
             //Painel de controlo
             b.setReward(this.currentBestReward);
@@ -208,7 +210,7 @@ public class Jenetic_L {
                 //Executar uma tentativa
                 Request req;
                 RunResult r;
-                
+
                 if (k == 20) {
                     req = new Request(Curent.comandsGameSize(5), "SuperMarioBros-" + this.world + "-" + this.stage + "-v0", "true", "level");
                     k = 1;
@@ -230,7 +232,7 @@ public class Jenetic_L {
                     break;
                 } else {
                     if (i == 20) {
-                        if(l < 10){
+                        if (l < 5) {
                             l++;
                         }
                         i = 0;
@@ -238,14 +240,8 @@ public class Jenetic_L {
 
                     //Iniciar anterior
                     if (Best.getSize() == 0) {
-                        if (!Curent.getReason().equals("death")) {
-                            Best = Curent.replicar();
-                            b.setMelhor_atingido(Best.getReward(), Best.getReason());
-                        } else {
-                            Best = new Chromosoma(0);
-                            Best.setReward(0);
-                            Best.setReason("death");
-                        }
+                        Best = Curent.replicar();
+                        b.setMelhor_atingido(Best.getReward(), Best.getReason());
                     }
 
                     if (!existeng) {
@@ -253,30 +249,49 @@ public class Jenetic_L {
                         lista_falhada = this.addChromosome(Curent.replicar(), lista_falhada);
                         this.save_fails();
                     } else {
+                        if(this.lista_falhada.get(0).getReward() != r.getReward()){
+                            this.lista_falhada.remove(0);
+                            this.lista_falhada.add(Curent.replicar());
+                        }
                         existeng = false;
                     }
 
                     //Vereficar se o anterior tem melhor resultado que o atual
-                    if (Curent.getReward() <= Best.getReward() && !Best.getReason().equals("death")) {
+                    if (Curent.getReward() < Best.getReward() && Best.getReward() < this.currentBestReward + this.min_size) {
                         Curent = Best.replicar();
                     }
 
-                    if (!Curent.getReason().equals("death") && Best.getReward() <= Curent.getReward()) {
-                        Best = Curent.replicar();
+                    if (Best.getReward() <= Curent.getReward()) {
+                        if (Curent.getReason().equals("death") && Curent.getReward() > this.currentBestReward + this.min_size) {
+                            Best = Curent.replicar();
+                            b.setMelhor_atingido(Best.getReward(), Best.getReason());
+                        } else if (!Curent.getReason().equals("death")) {
+                            Best = Curent.replicar();
+                            b.setMelhor_atingido(Best.getReward(), Best.getReason());
+                        }
                         //Caso o executado atual não esteja na lista de falhados
                         //Vereficar se o resultado melhor passado é melhor que o atual
+                    } else if (Curent.getReward() >= this.currentBestReward + this.min_size && !Curent.getReason().equals("death")) {
+                        Best = Curent.replicar();
                         b.setMelhor_atingido(Best.getReward(), Best.getReason());
+                    }
+                    
+                    if (r.getCommands_used() - this.size_last_time * 5 <= 40 && q == 0) {
+                        q = 1;
+                    }else{
+                        q = 0;
                     }
 
                     //Mudificar este dependendo da situação atual
                     if (this.currentBestReward + this.min_size > Curent.getReward()) {
-                        Curent = Curent.mutate(Curent.getGenes().size() - 40 - 8 * l, Curent.getGenes().size(), this.change_possibility);
+                        Curent.mutate(Curent.getGenes().size() - 40 - 8 * l - 8 * q, Curent.getGenes().size(), this.change_possibility);
                         i++;
                     } else if (Curent.getReason().equals("death")) {
-                        Curent = Curent.mutate(Curent.getGenes().size() - 40 - 8 * l, Curent.getGenes().size(), this.change_possibility);
+                        Curent.mutate(Curent.getGenes().size() - 40 - 8 * l - 8 * q, Curent.getGenes().size(), this.change_possibility);
                         i++;
                     } else {
                         this.currentBestReward = Curent.getReward();
+                        this.size_last_time = Curent.getGenes().size();
                         b.setReward(this.currentBestReward);
                         b.setMinimo_proxima(this.currentBestReward + this.min_size);
                         b.setMelhor_atingido(this.currentBestReward, Curent.getReason());
@@ -285,6 +300,7 @@ public class Jenetic_L {
                         Curent.incresseSizeGenes(40);
                         i = 0;
                         l = 0;
+                        q = 0;
                     }
 
                 }
