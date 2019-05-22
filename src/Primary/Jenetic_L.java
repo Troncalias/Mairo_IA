@@ -18,7 +18,7 @@ import luigi.Request;
 import luigi.RunResult;
 
 /**
- *
+ * Realiza os teste para o modo de Level
  * @author tronc
  */
 public class Jenetic_L {
@@ -37,7 +37,9 @@ public class Jenetic_L {
 
     private int currentBestReward = 0;
     private int size_last_time = 0;
+    
     private final MarioUtils mario;
+    private Butao_finalizar b;
 
     private final int min_size;
 
@@ -56,13 +58,14 @@ public class Jenetic_L {
      * @param size
      * @throws IOException
      */
-    public Jenetic_L(int world, int stage, int change_possibility, String fileF, String fileS, MarioUtils m, int size) throws IOException {
+    public Jenetic_L(int world, int stage, int change_possibility, String fileF, String fileS, MarioUtils m, Butao_finalizar b,int size) throws IOException {
         this.change_possibility = change_possibility;
         this.world = world;
         this.stage = stage;
         this.fileF = fileF;
         this.fileS = fileS;
         this.mario = m;
+        this.b = b;
         this.min_size = size;
 
         //Acceder ao ficheiro que guarda os dados FALHADOS deste World/Stage
@@ -139,7 +142,7 @@ public class Jenetic_L {
     public List<Chromosoma> addChromosome(Chromosoma chrom, List<Chromosoma> lista) {
         boolean added = false;
         List<Chromosoma> media = new ArrayList();
-        
+
         for (int i = 0; i < lista.size(); i++) {
             //Vereficar se o tempo do que se adiciona e inferior ao proximo da lista atual
             if (lista.get(i).getGenes().size() < chrom.getGenes().size()) {
@@ -168,15 +171,14 @@ public class Jenetic_L {
     /**
      * Execução do código principal
      *
-     * @param b Butão de controlo de execução
      * @param a define se vai vereficar a lista de sucesso
      * @throws CloneNotSupportedException
      * @throws IOException
      */
-    public void run(Butao_finalizar b, boolean a) throws CloneNotSupportedException, IOException {
+    public void run(boolean a) throws CloneNotSupportedException, IOException {
         if (!this.lista_sucesso.isEmpty()) {
             if (a) {
-                this.verefyPastSuccessfullRuns(b);
+                this.verefyPastSuccessfullRuns();
             }
         }
 
@@ -199,6 +201,9 @@ public class Jenetic_L {
             }
 
             int i = 0, l = 0, k = 0, q = 0;
+            
+            //Request rts = new Request(Curent.comandsGameSize(5), "SuperMarioBros-" + this.world + "-" + this.stage + "-v0", "true", "level");
+            //RunResult rtw = this.mario.goMarioGo(rts);
 
             //Painel de controlo
             b.setReward(this.currentBestReward);
@@ -249,7 +254,7 @@ public class Jenetic_L {
                         lista_falhada = this.addChromosome(Curent.replicar(), lista_falhada);
                         this.save_fails();
                     } else {
-                        if(this.lista_falhada.get(0).getReward() != r.getReward()){
+                        if (this.lista_falhada.get(0).getReward() != r.getReward()) {
                             this.lista_falhada.remove(0);
                             this.lista_falhada.add(Curent.replicar());
                         }
@@ -257,41 +262,35 @@ public class Jenetic_L {
                     }
 
                     //Vereficar se o anterior tem melhor resultado que o atual
-                    if (Curent.getReward() < Best.getReward() && Best.getReward() < this.currentBestReward + this.min_size) {
+                    if (Curent.getReward() < Best.getReward() && Curent.getReward() < this.currentBestReward + this.min_size && !Curent.getReason().equals("win")) {
                         Curent = Best.replicar();
                     }
 
                     if (Best.getReward() <= Curent.getReward()) {
-                        if (Curent.getReason().equals("death") && Curent.getReward() > this.currentBestReward + this.min_size) {
-                            Best = Curent.replicar();
-                            b.setMelhor_atingido(Best.getReward(), Best.getReason());
-                        } else if (!Curent.getReason().equals("death")) {
-                            Best = Curent.replicar();
-                            b.setMelhor_atingido(Best.getReward(), Best.getReason());
-                        }
-                        //Caso o executado atual não esteja na lista de falhados
-                        //Vereficar se o resultado melhor passado é melhor que o atual
-                    } else if (Curent.getReward() >= this.currentBestReward + this.min_size && !Curent.getReason().equals("death")) {
                         Best = Curent.replicar();
                         b.setMelhor_atingido(Best.getReward(), Best.getReason());
+                        //Caso o executado atual não esteja na lista de falhados
+                        //Vereficar se o resultado melhor passado é melhor que o atual
                     }
-                    
-                    if (r.getCommands_used() - this.size_last_time * 5 <= 40 && q == 0) {
+
+                    if (r.getCommands_used() - this.size_last_time <= 40 && q == 0) {
+                        q = 2;
+                    } else if (r.getCommands_used() - this.size_last_time <= 80 && q == 0){
                         q = 1;
-                    }else{
+                    } else{
                         q = 0;
                     }
 
                     //Mudificar este dependendo da situação atual
                     if (this.currentBestReward + this.min_size > Curent.getReward()) {
-                        Curent.mutate(Curent.getGenes().size() - 40 - 8 * l - 8 * q, Curent.getGenes().size(), this.change_possibility);
+                        Curent.mutate(Curent.getGenes().size() - 40 - 8 * l - 4 * q, Curent.getGenes().size(), this.change_possibility);
                         i++;
                     } else if (Curent.getReason().equals("death")) {
-                        Curent.mutate(Curent.getGenes().size() - 40 - 8 * l - 8 * q, Curent.getGenes().size(), this.change_possibility);
+                        Curent.mutate(Curent.getGenes().size() - 40 - 8 * l - 4 * q, Curent.getGenes().size(), this.change_possibility);
                         i++;
                     } else {
                         this.currentBestReward = Curent.getReward();
-                        this.size_last_time = Curent.getGenes().size();
+                        this.size_last_time = Curent.getGenes().size() * 5;
                         b.setReward(this.currentBestReward);
                         b.setMinimo_proxima(this.currentBestReward + this.min_size);
                         b.setMelhor_atingido(this.currentBestReward, Curent.getReason());
@@ -351,7 +350,7 @@ public class Jenetic_L {
      *
      * @return
      */
-    private void verefyPastSuccessfullRuns(Butao_finalizar b) throws CloneNotSupportedException, IOException {
+    private void verefyPastSuccessfullRuns() throws CloneNotSupportedException, IOException {
         RunResult r;
         for (int i = 0; i < this.lista_sucesso.size(); i++) {
             Integer[] in = this.lista_sucesso.get(i).comandsNormalSize();
@@ -365,9 +364,10 @@ public class Jenetic_L {
         }
         this.save_success();
         if (this.lista_sucesso.isEmpty()) {
-            this.run(b, false);
+            this.run(false);
+        }else{
+            this.run(true);
         }
-        this.run(b, false);
     }
 
     public void save() throws IOException {
@@ -383,6 +383,7 @@ public class Jenetic_L {
                 Fstream.write(s);
             }
             Fstream.flush();
+            Fstream.close();
         }
     }
 
@@ -393,6 +394,7 @@ public class Jenetic_L {
                 Sstream.write(this.lista_sucesso.get(i).toSave() + "\n");
             }
             Sstream.flush();
+            Sstream.close();
         }
     }
 

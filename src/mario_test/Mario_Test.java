@@ -5,8 +5,11 @@
  */
 package mario_test;
 
+import Controlo.Butao_finalizar;
+import Primary.Jenetic_C;
 import Primary.Start;
 import java.io.IOException;
+import luigi.MarioUtils;
 
 /**
  *
@@ -21,7 +24,12 @@ public class Mario_Test {
      */
     public static void main(String[] args) throws IOException, CloneNotSupportedException {
         // TODO code application logic here
-        Start s = new Start();
+        Butao_finalizar b = new Butao_finalizar();
+        MarioUtils m = new MarioUtils("192.168.1.6");
+        //String level_sucess, String forever_sucess, MarioUtils mario
+        //Jenetic_C j = new Jenetic_C("files/Level/Success/","files/Forever/",m);
+        //j.run();
+        Start s = new Start(m, b);
     }
 
 }
